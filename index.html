@@ -9,17 +9,11 @@
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <!-- التحقق من تسجيل الدخول -->
+    <!-- التحقق المباشر من تسجيل الدخول -->
     <script>
-        const SUPABASE_URL = 'https://fkowcbpcwzlzedjecfwg.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrb3djYnBjd3psemVkamVjZndnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNTg4NzUsImV4cCI6MjEwMjYzNDg3NX0.zktBZ883lvn3LBkVenQ-20NE25aD66kCw-AJKK2DbeE';
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        _supabase.auth.getSession().then(({ data: { session } }) => {
-            if (!session) {
-                window.location.href = 'login.html';
-            }
-        });
+        if (!localStorage.getItem('isLoggedIn')) {
+            window.location.href = 'login.html';
+        }
     </script>
 
     <style>
@@ -108,6 +102,11 @@
             border-radius: 6px;
             cursor: pointer;
             font-size: 0.9rem;
+            transition: 0.2s;
+        }
+
+        .logout-btn:hover {
+            background: #dc2626;
         }
 
         /* Main Content */
@@ -267,7 +266,7 @@
             </div>
 
             <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-                <h3>معدل انجاز المهام الأسبوعي</h3>
+                <h3>معدل إنجاز المهام الأسبوعي</h3>
                 <canvas id="tasksChart" style="max-height: 300px;"></canvas>
             </div>
         </section>
@@ -347,6 +346,10 @@
     </main>
 
     <script>
+        const SUPABASE_URL = 'https://fkowcbpcwzlzedjecfwg.supabase.co'; 
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrb3djYnBjd3psemVkamVjZndnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNTg4NzUsImV4cCI6MjEwMjYzNDg3NX0.zktBZ883lvn3LBkVenQ-20NE25aD66kCw-AJKK2DbeE'; 
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
         // التبديل بين التبويبات
         function switchTab(tabId, element) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
@@ -367,6 +370,7 @@
         // تسجيل الخروج
         async function logout() {
             await _supabase.auth.signOut();
+            localStorage.removeItem('isLoggedIn');
             window.location.href = 'login.html';
         }
 
