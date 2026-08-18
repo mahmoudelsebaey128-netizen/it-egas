@@ -6,19 +6,104 @@
     <title>تسجيل الدخول - GasTrack IT EGAS</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
-        * { box-sizing: border-box; font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; margin: 0; padding: 0; }
-        body { background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%); display: flex; justify-content: center; align-items: center; min-height: 100vh; }
-        .login-card { background: #ffffff; padding: 35px 30px; border-radius: 16px; box-shadow: 0 15px 35px rgba(0,0,0,0.25); width: 90%; max-width: 400px; text-align: center; }
-        .brand-logo { font-size: 2.2rem; color: #1e3a8a; margin-bottom: 10px; }
-        .login-card h2 { margin-bottom: 5px; color: #0f172a; font-size: 1.5rem; }
-        .sub-title { font-size: 0.85rem; color: #64748b; margin-bottom: 25px; }
-        .form-group { margin-bottom: 18px; text-align: right; }
-        .form-group label { display: block; margin-bottom: 6px; color: #334155; font-size: 13px; font-weight: 600; }
-        .form-group input { width: 100%; padding: 12px; border: 1px solid #cbd5e1; border-radius: 8px; outline: none; font-size: 14px; }
-        .form-group input:focus { border-color: #2563eb; }
-        .btn-submit { width: 100%; padding: 12px; background-color: #2563eb; color: white; border: none; border-radius: 8px; font-size: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; }
-        .btn-submit:hover { background-color: #1d4ed8; }
-        #alert-box { padding: 10px 12px; border-radius: 8px; margin-bottom: 18px; display: none; font-size: 13px; text-align: right; }
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e3a8a 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            color: #1e293b;
+        }
+
+        .login-card {
+            background: #ffffff;
+            padding: 35px 30px;
+            border-radius: 16px;
+            box-shadow: 0 15px 35px rgba(0,0,0,0.25);
+            width: 90%;
+            max-width: 400px;
+            text-align: center;
+        }
+
+        .brand-logo {
+            font-size: 2.2rem;
+            color: #1e3a8a;
+            margin-bottom: 10px;
+        }
+
+        .login-card h2 {
+            margin-bottom: 5px;
+            color: #0f172a;
+            font-size: 1.5rem;
+        }
+
+        .sub-title {
+            font-size: 0.85rem;
+            color: #64748b;
+            margin-bottom: 25px;
+        }
+
+        .form-group {
+            margin-bottom: 18px;
+            text-align: right;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 6px;
+            color: #334155;
+            font-size: 13px;
+            font-weight: 600;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #cbd5e1;
+            border-radius: 8px;
+            outline: none;
+            font-size: 14px;
+            transition: 0.3s;
+        }
+
+        .form-group input:focus {
+            border-color: #2563eb;
+            box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.15);
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 12px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 8px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+            transition: 0.2s;
+        }
+
+        .btn-submit:hover {
+            background-color: #1d4ed8;
+        }
+
+        #alert-box {
+            padding: 10px 12px;
+            border-radius: 8px;
+            margin-bottom: 18px;
+            display: none;
+            font-size: 13px;
+            text-align: right;
+        }
         .success { background-color: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
     </style>
 </head>
@@ -54,7 +139,7 @@
             e.preventDefault();
             const email = document.getElementById('email').value.trim();
 
-            // حفظ حالة الدخول والإيميل مباشرة
+            // حفظ حالة الدخول والإيميل مباشرة وبدون تعليق
             localStorage.setItem('isLoggedIn', 'true');
             localStorage.setItem('userEmail', email);
 
