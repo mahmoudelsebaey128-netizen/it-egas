@@ -131,11 +131,11 @@
     </div>
 
     <script>
-        // مفاتيح مشروعك الخاصة في Supabase
+        // رابط وحساب مشروعك على Supabase بالـ Key الجديد الصحيح
         const SUPABASE_URL = 'https://fkowcbpcwzlzedjecfwg.supabase.co'; 
-        const SUPABASE_ANON_KEY = 'Sb_publishable_99X8u8Pf6ntYBReh-1DdAg_ZI4I-Sbf'; 
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrb3djYnBjd3psemVkamVjZndnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNTg4NzUsImV4cCI6MjEwMjYzNDg3NX0.zktBZ883lvn3LBkVenQ-20NE25aD66kCw-AJKK2DbeE'; 
 
-        // تهيئة اتصال الباك إند
+        // تهيئة الاتصال بمكتبة Supabase
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let isSignUpMode = false;
@@ -147,7 +147,7 @@
         const toggleBtn = document.getElementById('toggle-btn');
         const alertBox = document.getElementById('alert-box');
 
-        // التبديل بين الدخول وإنشاء الحساب
+        // التبديل بين وضع تسجيل الدخول وتنسيق حساب جديد
         toggleBtn.addEventListener('click', (e) => {
             e.preventDefault();
             isSignUpMode = !isSignUpMode;
@@ -164,7 +164,7 @@
             }
         });
 
-        // تنفيذ عملية الدخول / التسجيل
+        // تنفيذ طلب الاتصال بـ Supabase عند الضغط
         authForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
@@ -173,7 +173,7 @@
             showAlert('جاري المعالجة...', 'success');
 
             if (isSignUpMode) {
-                // 1. إنشاء حساب جديد
+                // إنشاء حساب جديد
                 const { data, error } = await _supabase.auth.signUp({ email, password });
                 if (error) {
                     showAlert(error.message, 'error');
@@ -181,15 +181,15 @@
                     showAlert('تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول.', 'success');
                 }
             } else {
-                // 2. تسجيل دخول
+                // تسجيل الدخول
                 const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
                 if (error) {
-                    showAlert('خطأ في البريد أو كلمة السر', 'error');
+                    showAlert('خطأ في البريد الإلكتروني أو كلمة السر', 'error');
                 } else {
                     showAlert('تم تسجيل الدخول بنجاح! جاري التوجيه...', 'success');
                     setTimeout(() => {
-                        window.location.href = 'index.html'; // التوجيه لصفحتك الرئيسية
-                    }, 1500);
+                        window.location.href = 'index.html';
+                    }, 1200);
                 }
             }
         });
