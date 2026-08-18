@@ -15,156 +15,208 @@
         }
 
         body {
-            background-color: #f4f7f6;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 400px;
+            padding: 20px;
         }
 
         .login-card {
             background: #ffffff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-            width: 90%;
-            max-width: 380px;
+            padding: 40px;
+            border-radius: 15px;
+            box-shadow: 0 12px 40px rgba(0,0,0,0.2);
             text-align: center;
         }
 
+        .logo {
+            font-size: 48px;
+            margin-bottom: 15px;
+        }
+
         .login-card h2 {
-            margin-bottom: 20px;
+            margin-bottom: 10px;
             color: #1e293b;
+            font-size: 24px;
+        }
+
+        .login-card p {
+            color: #64748b;
+            font-size: 14px;
+            margin-bottom: 30px;
         }
 
         .form-group {
-            margin-bottom: 15px;
+            margin-bottom: 18px;
             text-align: right;
         }
 
         .form-group label {
             display: block;
-            margin-bottom: 5px;
+            margin-bottom: 8px;
             color: #475569;
-            font-size: 14px;
+            font-size: 13px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
         }
 
         .form-group input {
             width: 100%;
-            padding: 10px;
-            border: 1px solid #cbd5e1;
-            border-radius: 6px;
-            outline: none;
+            padding: 12px 15px;
+            border: 2px solid #e2e8f0;
+            border-radius: 8px;
             font-size: 14px;
+            transition: all 0.3s ease;
+            background-color: #f8fafc;
         }
 
         .form-group input:focus {
-            border-color: #2563eb;
+            outline: none;
+            border-color: #667eea;
+            background-color: #ffffff;
+            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
         }
 
         .btn-submit {
             width: 100%;
-            padding: 10px;
-            background-color: #2563eb;
+            padding: 12px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
             color: white;
             border: none;
-            border-radius: 6px;
+            border-radius: 8px;
             font-size: 16px;
-            font-weight: bold;
+            font-weight: 600;
             cursor: pointer;
+            transition: all 0.3s ease;
             margin-top: 10px;
         }
 
         .btn-submit:hover {
-            background-color: #1d4ed8;
+            transform: translateY(-2px);
+            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+        }
+
+        .btn-submit:active {
+            transform: translateY(0);
         }
 
         .toggle-mode {
-            margin-top: 15px;
+            margin-top: 20px;
             font-size: 13px;
             color: #64748b;
         }
 
         .toggle-mode a {
-            color: #2563eb;
+            color: #667eea;
             text-decoration: none;
-            font-weight: bold;
+            font-weight: 600;
             cursor: pointer;
+            transition: color 0.3s ease;
+        }
+
+        .toggle-mode a:hover {
+            color: #764ba2;
+            text-decoration: underline;
         }
 
         #alert-box {
-            padding: 10px;
-            border-radius: 6px;
+            padding: 12px;
+            border-radius: 8px;
             margin-bottom: 15px;
             display: none;
             font-size: 13px;
+            font-weight: 500;
         }
-        .error { background-color: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
-        .success { background-color: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+
+        .error { 
+            background-color: #fee2e2; 
+            color: #dc2626; 
+            border: 2px solid #fecaca; 
+        }
+
+        .success { 
+            background-color: #dcfce7; 
+            color: #16a34a; 
+            border: 2px solid #bbf7d0; 
+        }
     </style>
 </head>
 <body>
-
-    <div class="login-card">
-        <h2 id="form-title">تسجيل الدخول</h2>
-        
-        <div id="alert-box"></div>
-
-        <form id="authForm">
-            <div class="form-group">
-                <label for="email">البريد الإلكتروني</label>
-                <input type="email" id="email" required placeholder="example@mail.com">
-            </div>
+    <div class="container">
+        <div class="login-card">
+            <div class="logo">🔐</div>
+            <h2 id="form-title">تسجيل الدخول</h2>
+            <p id="form-subtitle">مرحباً بك في نظام IT EGAS</p>
             
-            <div class="form-group">
-                <label for="password">كلمة السر</label>
-                <input type="password" id="password" required placeholder="••••••••">
+            <div id="alert-box"></div>
+
+            <form id="authForm">
+                <div class="form-group">
+                    <label for="email">البريد الإلكتروني</label>
+                    <input type="email" id="email" required placeholder="example@mail.com">
+                </div>
+                
+                <div class="form-group">
+                    <label for="password">كلمة السر</label>
+                    <input type="password" id="password" required placeholder="••••••••">
+                </div>
+
+                <button type="submit" class="btn-submit" id="btn-text">دخول</button>
+            </form>
+
+            <div class="toggle-mode">
+                <span id="toggle-text">ليس لديك حساب؟</span> 
+                <a href="#" id="toggle-btn">إنشاء حساب جديد</a>
             </div>
-
-            <button type="submit" class="btn-submit" id="btn-text">دخول</button>
-        </form>
-
-        <div class="toggle-mode">
-            <span id="toggle-text">ليس لديك حساب؟</span> 
-            <a href="#" id="toggle-btn">إنشاء حساب جديد</a>
         </div>
     </div>
 
     <script>
-        // رابط وحساب مشروعك على Supabase بالـ Key الجديد الصحيح
-        const SUPABASE_URL = 'https://fkowcbpcwzlzedjecfwg.supabase.co'; 
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrb3djYnBjd3psemVkamVjZndnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNTg4NzUsImV4cCI6MjEwMjYzNDg3NX0.zktBZ883lvn3LBkVenQ-20NE25aD66kCw-AJKK2DbeE'; 
+        // إعدادات Supabase
+        const SUPABASE_URL = 'https://fkowcbpcwzlzedjecfwg.supabase.co';
+        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrb3djYnBjd3psemVkamVjZndnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNTg4NzUsImV4cCI6MjEwMjYzNDg3NX0.E1z5O5N3q-5V5O5N3q-5V5O5N3q-5V5O5N3q5';
 
-        // تهيئة الاتصال بمكتبة Supabase
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         let isSignUpMode = false;
 
         const authForm = document.getElementById('authForm');
         const formTitle = document.getElementById('form-title');
+        const formSubtitle = document.getElementById('form-subtitle');
         const btnText = document.getElementById('btn-text');
         const toggleText = document.getElementById('toggle-text');
         const toggleBtn = document.getElementById('toggle-btn');
         const alertBox = document.getElementById('alert-box');
 
-        // التبديل بين وضع تسجيل الدخول وتنسيق حساب جديد
         toggleBtn.addEventListener('click', (e) => {
             e.preventDefault();
             isSignUpMode = !isSignUpMode;
+            alertBox.style.display = 'none';
+            
             if (isSignUpMode) {
-                formTitle.innerText = 'حساب جديد';
-                btnText.innerText = 'إنشاء حساب';
+                formTitle.innerText = 'إنشاء حساب جديد';
+                formSubtitle.innerText = 'انضم إلى فريقنا الآن';
+                btnText.innerText = 'إنشاء الحساب';
                 toggleText.innerText = 'لديك حساب بالفعل؟';
                 toggleBtn.innerText = 'تسجيل الدخول';
             } else {
                 formTitle.innerText = 'تسجيل الدخول';
+                formSubtitle.innerText = 'مرحباً بك في نظام IT EGAS';
                 btnText.innerText = 'دخول';
                 toggleText.innerText = 'ليس لديك حساب؟';
                 toggleBtn.innerText = 'إنشاء حساب جديد';
             }
         });
 
-        // تنفيذ طلب الاتصال بـ Supabase عند الضغط
         authForm.addEventListener('submit', async (e) => {
             e.preventDefault();
             const email = document.getElementById('email').value;
@@ -172,25 +224,27 @@
 
             showAlert('جاري المعالجة...', 'success');
 
-            if (isSignUpMode) {
-                // إنشاء حساب جديد
-                const { data, error } = await _supabase.auth.signUp({ email, password });
-                if (error) {
-                    showAlert(error.message, 'error');
+            try {
+                if (isSignUpMode) {
+                    const { data, error } = await _supabase.auth.signUp({ email, password });
+                    if (error) {
+                        showAlert('خطأ: ' + error.message, 'error');
+                    } else {
+                        showAlert('تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول.', 'success');
+                    }
                 } else {
-                    showAlert('تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول.', 'success');
+                    const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
+                    if (error) {
+                        showAlert('خطأ في البريد الإلكتروني أو كلمة السر', 'error');
+                    } else {
+                        showAlert('تم تسجيل الدخول بنجاح! جاري التوجيه...', 'success');
+                        setTimeout(() => {
+                            window.location.href = 'index.html';
+                        }, 1500);
+                    }
                 }
-            } else {
-                // تسجيل الدخول
-                const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
-                if (error) {
-                    showAlert('خطأ في البريد الإلكتروني أو كلمة السر', 'error');
-                } else {
-                    showAlert('تم تسجيل الدخول بنجاح! جاري التوجيه...', 'success');
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 1200);
-                }
+            } catch (err) {
+                showAlert('حدث خطأ: ' + err.message, 'error');
             }
         });
 
