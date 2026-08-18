@@ -4,14 +4,13 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>GasTrack - IT Operations Dashboard | EGAS</title>
-    <!-- FontAwesome & Chart.js & Supabase -->
+    <!-- FontAwesome & Chart.js -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <!-- حماية الصفحة والتأكد من التسجيل -->
+    <!-- التحقق المباشر والسريع من تسجيل الدخول -->
     <script>
-        if (!localStorage.getItem('isLoggedIn')) {
+        if (localStorage.getItem('isLoggedIn') !== 'true') {
             window.location.href = 'login.html';
         }
     </script>
@@ -285,7 +284,7 @@
         <header>
             <div class="header-title">
                 <h1 id="page-title">لوحة الإحصائيات العامة</h1>
-                <p>ال الشركة المصرية القابضة للغازات الطبيعية - EGAS IT Operations</p>
+                <p>الشركة المصرية القابضة للغازات الطبيعية - EGAS IT Operations</p>
             </div>
             <div style="font-size: 0.85rem; font-weight: 600; color: #2563eb; background: #eff6ff; padding: 6px 12px; border-radius: 8px;">
                 <i class="fa-solid fa-server"></i> السيرفرات تعمل بكفاءة
@@ -360,7 +359,7 @@
                     </div>
                     <div class="task-card" style="border-right-color: #d97706;">
                         <span class="task-tag tag-medium">أولوية متوسطة</span>
-                        <div class="task-title">ربط قاعدة بيانات EGAS بـ Supabase</div>
+                        <div class="task-title">ربط قاعدة بيانات EGAS بالخادم الرئيسي</div>
                         <div class="task-footer"><span>#EGAS-98</span> <span>محمود حنفي</span></div>
                     </div>
                 </div>
@@ -498,17 +497,13 @@
     </main>
 
     <script>
-        const SUPABASE_URL = 'https://fkowcbpcwzlzedjecfwg.supabase.co'; 
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrb3djYnBjd3psemVkamVjZndnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNTg4NzUsImV4cCI6MjEwMjYzNDg3NX0.zktBZ883lvn3LBkVenQ-20NE25aD66kCw-AJKK2DbeE'; 
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        // إظهار إيميل المستخدم
+        // عرض إيميل المستخدم الحالي المسجل
         const savedEmail = localStorage.getItem('userEmail');
         if (savedEmail) {
             document.getElementById('user-display-email').innerText = savedEmail;
         }
 
-        // التبديل بين التبويبات
+        // التبديل بين التبويبات بالكامل
         function switchTab(tabId, element) {
             document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
             document.querySelectorAll('.sidebar-menu li').forEach(li => li.classList.remove('active'));
@@ -526,15 +521,14 @@
             document.getElementById('page-title').innerText = titles[tabId];
         }
 
-        // تسجيل الخروج
-        async function logout() {
-            await _supabase.auth.signOut();
+        // تسجيل الخروج المباشر والعودة للـ Login
+        function logout() {
             localStorage.removeItem('isLoggedIn');
             localStorage.removeItem('userEmail');
             window.location.href = 'login.html';
         }
 
-        // رسم بياني تفاعلي
+        // الرسم البياني التفاعلي
         const ctx = document.getElementById('tasksChart').getContext('2d');
         new Chart(ctx, {
             type: 'bar',
