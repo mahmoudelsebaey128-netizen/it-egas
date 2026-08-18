@@ -3,13 +3,13 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GasTrack - IT Operations Dashboard</title>
+    <title>GasTrack - IT Operations Dashboard | EGAS</title>
     <!-- FontAwesome & Chart.js & Supabase -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
-    <!-- التحقق المباشر من تسجيل الدخول -->
+    <!-- حماية الصفحة والتأكد من التسجيل -->
     <script>
         if (!localStorage.getItem('isLoggedIn')) {
             window.location.href = 'login.html';
@@ -18,11 +18,14 @@
 
     <style>
         :root {
-            --primary-color: #1e3a8a;
-            --secondary-color: #3b82f6;
-            --bg-color: #f8fafc;
+            --primary-bg: #0f172a;
+            --sidebar-bg: #1e293b;
+            --accent-blue: #2563eb;
+            --main-bg: #f8fafc;
             --card-bg: #ffffff;
-            --text-color: #1e293b;
+            --text-main: #0f172a;
+            --text-muted: #64748b;
+            --border-color: #e2e8f0;
             --sidebar-width: 260px;
         }
 
@@ -35,79 +38,96 @@
 
         body {
             display: flex;
-            background-color: var(--bg-color);
-            color: var(--text-color);
+            background-color: var(--main-bg);
+            color: var(--text-main);
             min-height: 100vh;
         }
 
         /* Sidebar Styles */
         .sidebar {
             width: var(--sidebar-width);
-            background-color: var(--primary-color);
+            background-color: var(--sidebar-bg);
             color: white;
             display: flex;
             flex-direction: column;
             justify-content: space-between;
-            padding: 20px 0;
             position: fixed;
             height: 100vh;
             right: 0;
             top: 0;
             z-index: 100;
+            box-shadow: -2px 0 10px rgba(0,0,0,0.1);
         }
 
         .sidebar .brand {
-            padding: 0 20px 20px;
-            font-size: 1.4rem;
+            padding: 20px;
+            font-size: 1.3rem;
             font-weight: bold;
             border-bottom: 1px solid rgba(255, 255, 255, 0.1);
             display: flex;
             align-items: center;
-            gap: 10px;
+            gap: 12px;
+            background: #0f172a;
         }
 
         .sidebar-menu {
             list-style: none;
-            margin-top: 20px;
+            padding-top: 15px;
+        }
+
+        .sidebar-menu li {
+            margin-bottom: 4px;
         }
 
         .sidebar-menu li a {
             display: flex;
             align-items: center;
             gap: 12px;
-            padding: 14px 20px;
-            color: #cbd5e1;
+            padding: 12px 20px;
+            color: #94a3b8;
             text-decoration: none;
-            transition: 0.3s;
+            font-size: 0.95rem;
+            font-weight: 500;
+            transition: 0.2s;
+            border-right: 4px solid transparent;
         }
 
-        .sidebar-menu li a:hover, .sidebar-menu li.active a {
-            background-color: var(--secondary-color);
+        .sidebar-menu li:hover a, .sidebar-menu li.active a {
+            background-color: rgba(255, 255, 255, 0.05);
             color: white;
+            border-right-color: var(--accent-blue);
         }
 
         .user-panel {
             padding: 15px 20px;
             border-top: 1px solid rgba(255, 255, 255, 0.1);
+            background: #0f172a;
             display: flex;
             align-items: center;
             justify-content: space-between;
+        }
+
+        .user-info {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            font-size: 0.85rem;
+            color: #cbd5e1;
         }
 
         .logout-btn {
             background: #ef4444;
             color: white;
             border: none;
-            padding: 8px 12px;
+            padding: 6px 12px;
             border-radius: 6px;
             cursor: pointer;
-            font-size: 0.9rem;
+            font-size: 0.8rem;
+            font-weight: bold;
             transition: 0.2s;
         }
 
-        .logout-btn:hover {
-            background: #dc2626;
-        }
+        .logout-btn:hover { background: #dc2626; }
 
         /* Main Content */
         .main-content {
@@ -121,20 +141,23 @@
             justify-content: space-between;
             align-items: center;
             margin-bottom: 25px;
+            background: white;
+            padding: 15px 25px;
+            border-radius: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
+            border: 1px solid var(--border-color);
         }
 
-        .tab-content {
-            display: none;
-        }
+        .header-title h1 { font-size: 1.4rem; color: var(--primary-bg); }
+        .header-title p { font-size: 0.85rem; color: var(--text-muted); }
 
-        .tab-content.active {
-            display: block;
-        }
+        .tab-content { display: none; }
+        .tab-content.active { display: block; }
 
-        /* Stats Cards */
+        /* Jira Stats Grid */
         .stats-grid {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
             gap: 20px;
             margin-bottom: 25px;
         }
@@ -142,66 +165,83 @@
         .stat-card {
             background: var(--card-bg);
             padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
             display: flex;
             align-items: center;
             justify-content: space-between;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
 
-        .stat-card i {
-            font-size: 2.2rem;
-            color: var(--secondary-color);
-        }
+        .stat-card h3 { font-size: 0.85rem; color: var(--text-muted); margin-bottom: 5px; }
+        .stat-card .val { font-size: 1.6rem; font-weight: bold; color: var(--text-main); }
+        .stat-card i { font-size: 2rem; opacity: 0.8; }
 
-        /* Kanban Board */
+        /* Jira Style Kanban Board */
         .kanban-board {
             display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
-            gap: 20px;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 15px;
+            overflow-x: auto;
         }
 
         .kanban-col {
-            background: #e2e8f0;
+            background: #f1f5f9;
             padding: 15px;
-            border-radius: 8px;
-            min-height: 400px;
+            border-radius: 10px;
+            min-height: 500px;
+            border: 1px solid #e2e8f0;
         }
 
-        .kanban-col h3 {
-            font-size: 1rem;
-            margin-bottom: 15px;
+        .kanban-col-header {
+            font-size: 0.9rem;
+            font-weight: bold;
             color: #475569;
+            margin-bottom: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding-bottom: 8px;
+            border-bottom: 2px solid #cbd5e1;
         }
 
         .task-card {
             background: white;
-            padding: 12px;
-            border-radius: 6px;
-            margin-bottom: 10px;
-            box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+            padding: 12px 15px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            box-shadow: 0 2px 4px rgba(0,0,0,0.04);
+            border-right: 4px solid var(--accent-blue);
+            cursor: pointer;
+            transition: 0.2s;
         }
+
+        .task-card:hover { transform: translateY(-2px); box-shadow: 0 4px 8px rgba(0,0,0,0.08); }
+        .task-tag { font-size: 0.7rem; font-weight: bold; padding: 2px 6px; border-radius: 4px; display: inline-block; margin-bottom: 6px; }
+        .tag-urgent { background: #fee2e2; color: #ef4444; }
+        .tag-medium { background: #fef3c7; color: #d97706; }
+        .tag-low { background: #e0e7ff; color: #4338ca; }
+
+        .task-title { font-size: 0.9rem; font-weight: 600; color: #1e293b; margin-bottom: 8px; }
+        .task-footer { display: flex; justify-content: space-between; align-items: center; font-size: 0.75rem; color: #94a3b8; }
 
         /* Tables */
-        table {
-            width: 100%;
-            border-collapse: collapse;
+        .table-container {
             background: white;
-            border-radius: 8px;
+            border-radius: 12px;
+            border: 1px solid var(--border-color);
             overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.05);
+            box-shadow: 0 2px 4px rgba(0,0,0,0.02);
         }
 
-        th, td {
-            padding: 12px 15px;
-            text-align: right;
-            border-bottom: 1px solid #e2e8f0;
-        }
-
-        th {
-            background-color: #f1f5f9;
-            color: #334155;
-        }
+        table { width: 100%; border-collapse: collapse; text-align: right; }
+        th, td { padding: 14px 18px; font-size: 0.9rem; border-bottom: 1px solid var(--border-color); }
+        th { background: #f8fafc; color: #475569; font-weight: 600; }
+        
+        .badge { padding: 4px 8px; border-radius: 6px; font-size: 0.75rem; font-weight: bold; }
+        .badge-success { background: #dcfce7; color: #16a34a; }
+        .badge-warning { background: #fef3c7; color: #d97706; }
+        .badge-danger { background: #fee2e2; color: #dc2626; }
     </style>
 </head>
 <body>
@@ -210,17 +250,32 @@
     <aside class="sidebar">
         <div>
             <div class="brand">
-                <i class="fa-solid fa-gas-pump"></i> GasTrack EGAS
+                <i class="fa-solid fa-gas-pump" style="color: #3b82f6;"></i>
+                <span>GasTrack EGAS</span>
             </div>
             <ul class="sidebar-menu">
-                <li class="active" onclick="switchTab('dashboard', this)"><a href="#"><i class="fa-solid fa-chart-line"></i> لوحة التحكم</a></li>
-                <li onclick="switchTab('kanban', this)"><a href="#"><i class="fa-solid fa-list-check"></i> لوحة المهام (Kanban)</a></li>
-                <li onclick="switchTab('team', this)"><a href="#"><i class="fa-solid fa-users"></i> الموظفين والحضور</a></li>
-                <li onclick="switchTab('tickets', this)"><a href="#"><i class="fa-solid fa-ticket"></i> التذاكر والطلبات</a></li>
+                <li class="active" onclick="switchTab('dashboard', this)">
+                    <a href="#"><i class="fa-solid fa-chart-pie"></i> لوحة الإحصائيات</a>
+                </li>
+                <li onclick="switchTab('kanban', this)">
+                    <a href="#"><i class="fa-solid fa-kanban"></i> لوحة المهام (Jira)</a>
+                </li>
+                <li onclick="switchTab('team', this)">
+                    <a href="#"><i class="fa-solid fa-users-gear"></i> فريق IT والحضور</a>
+                </li>
+                <li onclick="switchTab('tickets', this)">
+                    <a href="#"><i class="fa-solid fa-headset"></i> تذاكر الدعم الفني</a>
+                </li>
+                <li onclick="switchTab('network', this)">
+                    <a href="#"><i class="fa-solid fa-network-wired"></i> حالة الشبكات والملفات</a>
+                </li>
             </ul>
         </div>
         <div class="user-panel">
-            <span><i class="fa-solid fa-user-gear"></i> أدمن النظام</span>
+            <div class="user-info">
+                <i class="fa-solid fa-circle-user fa-lg" style="color: #3b82f6;"></i>
+                <span id="user-display-email">admin@egas.com.eg</span>
+            </div>
             <button class="logout-btn" onclick="logout()"><i class="fa-solid fa-right-from-bracket"></i> خروج</button>
         </div>
     </aside>
@@ -228,8 +283,13 @@
     <!-- Main Content -->
     <main class="main-content">
         <header>
-            <h1 id="page-title">لوحة التحكم والمتابعة</h1>
-            <div>شركة EGAS - إدارة تكنولوجيا المعلومات</div>
+            <div class="header-title">
+                <h1 id="page-title">لوحة الإحصائيات العامة</h1>
+                <p>ال الشركة المصرية القابضة للغازات الطبيعية - EGAS IT Operations</p>
+            </div>
+            <div style="font-size: 0.85rem; font-weight: 600; color: #2563eb; background: #eff6ff; padding: 6px 12px; border-radius: 8px;">
+                <i class="fa-solid fa-server"></i> السيرفرات تعمل بكفاءة
+            </div>
         </header>
 
         <!-- Tab 1: Dashboard -->
@@ -237,111 +297,203 @@
             <div class="stats-grid">
                 <div class="stat-card">
                     <div>
-                        <h3>إجمالي المهام</h3>
-                        <p style="font-size: 1.5rem; font-weight: bold; margin-top: 5px;">24</p>
+                        <h3>إجمالي مهام الـ IT</h3>
+                        <div class="val">32</div>
                     </div>
-                    <i class="fa-solid fa-tasks"></i>
+                    <i class="fa-solid fa-list-check" style="color: #2563eb;"></i>
                 </div>
                 <div class="stat-card">
                     <div>
-                        <h3>قيد التنفيذ</h3>
-                        <p style="font-size: 1.5rem; font-weight: bold; margin-top: 5px; color: #f59e0b;">8</p>
+                        <h3>قيد التنفيذ (Sprint)</h3>
+                        <div class="val">9</div>
                     </div>
-                    <i class="fa-solid fa-spinner"></i>
+                    <i class="fa-solid fa-spinner" style="color: #d97706;"></i>
                 </div>
                 <div class="stat-card">
                     <div>
-                        <h3>المهام المكتملة</h3>
-                        <p style="font-size: 1.5rem; font-weight: bold; margin-top: 5px; color: #10b981;">14</p>
+                        <h3>مهام مكتملة</h3>
+                        <div class="val">18</div>
                     </div>
-                    <i class="fa-solid fa-check-circle"></i>
+                    <i class="fa-solid fa-circle-check" style="color: #16a34a;"></i>
                 </div>
                 <div class="stat-card">
                     <div>
-                        <h3>طلبات الدعم</h3>
-                        <p style="font-size: 1.5rem; font-weight: bold; margin-top: 5px; color: #ef4444;">2</p>
+                        <h3>تذاكر معلقة</h3>
+                        <div class="val">5</div>
                     </div>
-                    <i class="fa-solid fa-headset"></i>
+                    <i class="fa-solid fa-triangle-exclamation" style="color: #dc2626;"></i>
                 </div>
             </div>
 
-            <div style="background: white; padding: 20px; border-radius: 10px; box-shadow: 0 4px 6px rgba(0,0,0,0.05);">
-                <h3>معدل إنجاز المهام الأسبوعي</h3>
-                <canvas id="tasksChart" style="max-height: 300px;"></canvas>
+            <div style="background: white; padding: 20px; border-radius: 12px; border: 1px solid var(--border-color);">
+                <h3 style="font-size: 1rem; color: #334155; margin-bottom: 15px;">معدل إنجاز طلبات أقسام EGAS هذا الأسبوع</h3>
+                <canvas id="tasksChart" style="max-height: 280px;"></canvas>
             </div>
         </section>
 
-        <!-- Tab 2: Kanban Board -->
+        <!-- Tab 2: Jira Kanban Board -->
         <section id="kanban" class="tab-content">
             <div class="kanban-board">
+                <!-- Column 1 -->
                 <div class="kanban-col">
-                    <h3><i class="fa-solid fa-circle-dot" style="color: #64748b;"></i> مهام جديدة</h3>
-                    <div class="task-card">تحديث برامج الحماية لقسم المالية</div>
-                    <div class="task-card">إعداد سيرفر النسخ الاحتياطي</div>
+                    <div class="kanban-col-header">
+                        <span>قائمة المهام (Backlog)</span>
+                        <span style="background: #e2e8f0; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem;">3</span>
+                    </div>
+                    <div class="task-card" style="border-right-color: #ef4444;">
+                        <span class="task-tag tag-urgent">عاجل جداً</span>
+                        <div class="task-title">تحديث برامج الحماية لقسم المالية</div>
+                        <div class="task-footer"><span>#EGAS-102</span> <span>محمود حنفي</span></div>
+                    </div>
+                    <div class="task-card" style="border-right-color: #4338ca;">
+                        <span class="task-tag tag-low">منخفضة</span>
+                        <div class="task-title">إعداد سيرفر النسخ الاحتياطي اليومي</div>
+                        <div class="task-footer"><span>#EGAS-105</span> <span>أحمد مصطفى</span></div>
+                    </div>
                 </div>
+
+                <!-- Column 2 -->
                 <div class="kanban-col">
-                    <h3><i class="fa-solid fa-spinner" style="color: #f59e0b;"></i> جاري العمل</h3>
-                    <div class="task-card">ربط قاعدة بيانات EGAS بـ Supabase</div>
+                    <div class="kanban-col-header">
+                        <span>جاري العمل (In Progress)</span>
+                        <span style="background: #fef3c7; color: #b45309; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem;">2</span>
+                    </div>
+                    <div class="task-card" style="border-right-color: #d97706;">
+                        <span class="task-tag tag-medium">أولوية متوسطة</span>
+                        <div class="task-title">ربط قاعدة بيانات EGAS بـ Supabase</div>
+                        <div class="task-footer"><span>#EGAS-98</span> <span>محمود حنفي</span></div>
+                    </div>
                 </div>
+
+                <!-- Column 3 -->
                 <div class="kanban-col">
-                    <h3><i class="fa-solid fa-magnifying-glass" style="color: #3b82f6;"></i> المراجعة والاختبار</h3>
-                    <div class="task-card">اختبار نظام تسجيل الدخول الجديد</div>
+                    <div class="kanban-col-header">
+                        <span>مراجعة واختبار (In Review)</span>
+                        <span style="background: #e0e7ff; color: #3730a3; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem;">1</span>
+                    </div>
+                    <div class="task-card" style="border-right-color: #2563eb;">
+                        <span class="task-tag tag-medium">أولوية متوسطة</span>
+                        <div class="task-title">اختبار نظام تسجيل الدخول الموحد</div>
+                        <div class="task-footer"><span>#EGAS-94</span> <span>فريق الشبكات</span></div>
+                    </div>
                 </div>
+
+                <!-- Column 4 -->
                 <div class="kanban-col">
-                    <h3><i class="fa-solid fa-circle-check" style="color: #10b981;"></i> مكتملة</h3>
-                    <div class="task-card">إنشاء واجهة التحكم لـ IT Operations</div>
+                    <div class="kanban-col-header">
+                        <span>مكتملة (Done)</span>
+                        <span style="background: #dcfce7; color: #15803d; padding: 2px 8px; border-radius: 10px; font-size: 0.75rem;">4</span>
+                    </div>
+                    <div class="task-card" style="border-right-color: #16a34a;">
+                        <span class="task-tag tag-low">تم الإنجاز</span>
+                        <div class="task-title">تطوير واجهة التحكم الخاصة بـ IT EGAS</div>
+                        <div class="task-footer"><span>#EGAS-88</span> <span>محمود حنفي</span></div>
+                    </div>
                 </div>
             </div>
         </section>
 
         <!-- Tab 3: Team -->
         <section id="team" class="tab-content">
-            <table>
-                <thead>
-                    <tr>
-                        <th>اسم الموظف</th>
-                        <th>الدور الوظيفي</th>
-                        <th>الحالة</th>
-                        <th>ساعات العمل اليوم</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>محمود محمد حنفي</td>
-                        <td>Full Stack Developer</td>
-                        <td><span style="color: green;">حاضر</span></td>
-                        <td>8 ساعات</td>
-                    </tr>
-                    <tr>
-                        <td>أحمد مصطفى</td>
-                        <td>Network Administrator</td>
-                        <td><span style="color: green;">حاضر</span></td>
-                        <td>7.5 ساعات</td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>اسم الموظف</th>
+                            <th>الدور الوظيفي</th>
+                            <th>القسم</th>
+                            <th>حالة الحضور</th>
+                            <th>المهام الموكلة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><b>محمود محمد محمود حنفي</b></td>
+                            <td>Full Stack & System Developer</td>
+                            <td>تكنولوجيا المعلومات (IT)</td>
+                            <td><span class="badge badge-success">حاضر (متصل)</span></td>
+                            <td>3 مهام نشطة</td>
+                        </tr>
+                        <tr>
+                            <td>أحمد مصطفى</td>
+                            <td>Network & Infrastructure Admin</td>
+                            <td>إدارة الشبكات</td>
+                            <td><span class="badge badge-success">حاضر</span></td>
+                            <td>مهمتان</td>
+                        </tr>
+                        <tr>
+                            <td>سارة إبراهيم</td>
+                            <td>Cybersecurity Specialist</td>
+                            <td>الأمن السيبراني</td>
+                            <td><span class="badge badge-warning">في اجتماع</span></td>
+                            <td>مهمة واحدة</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </section>
 
         <!-- Tab 4: Tickets -->
         <section id="tickets" class="tab-content">
-            <table>
-                <thead>
-                    <tr>
-                        <th>رقم التذكرة</th>
-                        <th>الموضوع</th>
-                        <th>القسم المتقدم</th>
-                        <th>الأولوية</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    <tr>
-                        <td>#TK-1092</td>
-                        <td>بطء في شبكة العمل الداخلية</td>
-                        <td>إدارة الشؤون الإدارية</td>
-                        <td><span style="color: red;">عاجل</span></td>
-                    </tr>
-                </tbody>
-            </table>
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>رقم التذكرة</th>
+                            <th>الموضوع</th>
+                            <th>الجهة الطالبة</th>
+                            <th>الأولوية</th>
+                            <th>الحالة</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>#TK-1092</td>
+                            <td>بطء في شبكة الربط بالمركز الرئيسي</td>
+                            <td>إدارة الشؤون الإدارية</td>
+                            <td><span class="badge badge-danger">عاجل</span></td>
+                            <td><span class="badge badge-warning">قيد المعالجة</span></td>
+                        </tr>
+                        <tr>
+                            <td>#TK-1088</td>
+                            <td>طلب حساب جديد لموظف جديد</td>
+                            <td>الموارد البشرية (HR)</td>
+                            <td><span class="badge badge-success">عادي</span></td>
+                            <td><span class="badge badge-success">تم الحل</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- Tab 5: Network -->
+        <section id="network" class="tab-content">
+            <div class="table-container">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>الخدمة / السيرفر</th>
+                            <th>البروتوكول</th>
+                            <th>IP Address</th>
+                            <th>الحالة التشغيلية</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>سيرفر قواعد البيانات الرئيسي</td>
+                            <td>MySQL / HTTPS</td>
+                            <td>192.168.1.50</td>
+                            <td><span class="badge badge-success">شغال 100%</span></td>
+                        </tr>
+                        <tr>
+                            <td>بوابة الربط والـ Firewall</td>
+                            <td>NGFW / NAT</td>
+                            <td>10.0.0.1</td>
+                            <td><span class="badge badge-success">مستقر</span></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
         </section>
     </main>
 
@@ -349,6 +501,12 @@
         const SUPABASE_URL = 'https://fkowcbpcwzlzedjecfwg.supabase.co'; 
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrb3djYnBjd3psemVkamVjZndnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNTg4NzUsImV4cCI6MjEwMjYzNDg3NX0.zktBZ883lvn3LBkVenQ-20NE25aD66kCw-AJKK2DbeE'; 
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        // إظهار إيميل المستخدم
+        const savedEmail = localStorage.getItem('userEmail');
+        if (savedEmail) {
+            document.getElementById('user-display-email').innerText = savedEmail;
+        }
 
         // التبديل بين التبويبات
         function switchTab(tabId, element) {
@@ -359,10 +517,11 @@
             element.classList.add('active');
 
             const titles = {
-                'dashboard': 'لوحة التحكم والمتابعة',
-                'kanban': 'لوحة المهام (Kanban)',
-                'team': 'إدارة الموظفين والحضور',
-                'tickets': 'تذاكر الدعم الفني'
+                'dashboard': 'لوحة الإحصائيات العامة',
+                'kanban': 'لوحة المهام والعمليات (Jira Board)',
+                'team': 'فريق العمل والحضور والغياب',
+                'tickets': 'تذاكر الدعم الفني والطلبات',
+                'network': 'حالة السيرفرات والشبكات الداخلية'
             };
             document.getElementById('page-title').innerText = titles[tabId];
         }
@@ -371,23 +530,26 @@
         async function logout() {
             await _supabase.auth.signOut();
             localStorage.removeItem('isLoggedIn');
+            localStorage.removeItem('userEmail');
             window.location.href = 'login.html';
         }
 
         // رسم بياني تفاعلي
         const ctx = document.getElementById('tasksChart').getContext('2d');
         new Chart(ctx, {
-            type: 'line',
+            type: 'bar',
             data: {
-                labels: ['السبت', 'الأحد', 'الإثنين', 'الثلاثاء', 'الأربعاء', 'الخميس'],
+                labels: ['المالية', 'الموارد البشرية', 'العمليات', 'الاستكشاف', 'الشؤون الإدارية'],
                 datasets: [{
-                    label: 'المهام المكتملة',
-                    data: [3, 5, 2, 8, 6, 9],
-                    borderColor: '#3b82f6',
-                    backgroundColor: 'rgba(59, 130, 246, 0.1)',
-                    fill: true,
-                    tension: 0.3
+                    label: 'عدد الطلبات المنجزة',
+                    data: [12, 19, 8, 15, 7],
+                    backgroundColor: '#2563eb',
+                    borderRadius: 6
                 }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: false } }
             }
         });
     </script>
