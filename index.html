@@ -1,829 +1,617 @@
-// GasTrack / Jira Clone Application Engine
-
-class GasTrackApp {
-  constructor() {
-    this.team = JSON.parse(localStorage.getItem('gt_team')) || INITIAL_TEAM;
-    this.tasks = JSON.parse(localStorage.getItem('gt_tasks')) || INITIAL_TASKS;
-    this.achievements = JSON.parse(localStorage.getItem('gt_achievements')) || INITIAL_ACHIEVEMENTS;
-    this.activeTab = 'dashboard';
-    this.activeFilters = {
-      assignee: 'all',
-      category: 'all',
-      priority: 'all',
-      search: ''
-    };
-    this.pendingCompletionTaskId = null;
-    this.categoryChart = null;
-    this.init();
-  }
-
-  init() {
-    this.saveState();
-    this.bindEvents();
-    this.render();
-    this.initLucideIcons();
-  }
-
-  saveState() {
-    localStorage.setItem('gt_team', JSON.stringify(this.team));
-    localStorage.setItem('gt_tasks', JSON.stringify(this.tasks));
-    localStorage.setItem('gt_achievements', JSON.stringify(this.achievements));
-  }
-
-  initLucideIcons() {
-    if (window.lucide) {
-      window.lucide.createIcons();
-    }
-  }
-
-  bindEvents() {
-    // Navigation Tabs
-    document.querySelectorAll('.nav-tab').forEach(tab => {
-      tab.addEventListener('click', (e) => {
-        const targetTab = e.currentTarget.dataset.tab;
-        this.setActiveTab(targetTab);
-      });
-    });
-
-    // Theme Toggle
-    const themeBtn = document.getElementById('themeToggleBtn');
-    if (themeBtn) {
-      themeBtn.addEventListener('click', () => {
-        document.body.classList.toggle('light-theme');
-        const icon = themeBtn.querySelector('i');
-        if (document.body.classList.contains('light-theme')) {
-          themeBtn.innerHTML = `<i data-lucide="moon" class="w-4 h-4 text-slate-700"></i><span class="text-xs text-slate-700">Dark</span>`;
-        } else {
-          themeBtn.innerHTML = `<i data-lucide="sun" class="w-4 h-4 text-amber-400"></i><span class="text-xs text-slate-300">Light</span>`;
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>GasTrack - تطبيق إدارة المشاريع</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
+    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.0/dist/confetti.browser.min.js"></script>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
         }
-        this.initLucideIcons();
-      });
-    }
 
-    // Modal Triggers
-    const createTaskBtn = document.getElementById('openCreateTaskModalBtn');
-    if (createTaskBtn) {
-      createTaskBtn.addEventListener('click', () => this.openCreateModal());
-    }
-
-    const closeCreateModalBtn = document.getElementById('closeCreateTaskModalBtn');
-    if (closeCreateModalBtn) {
-      closeCreateModalBtn.addEventListener('click', () => this.closeCreateModal());
-    }
-
-    const createTaskForm = document.getElementById('createTaskForm');
-    if (createTaskForm) {
-      createTaskForm.addEventListener('submit', (e) => this.handleCreateTask(e));
-    }
-
-    // Rating Modal
-    const closeRatingModalBtn = document.getElementById('closeRatingModalBtn');
-    if (closeRatingModalBtn) {
-      closeRatingModalBtn.addEventListener('click', () => this.closeRatingModal());
-    }
-
-    const ratingForm = document.getElementById('ratingForm');
-    if (ratingForm) {
-      ratingForm.addEventListener('submit', (e) => this.handleRatingSubmit(e));
-    }
-
-    // Filter Listeners
-    const searchInput = document.getElementById('filterSearchInput');
-    if (searchInput) {
-      searchInput.addEventListener('input', (e) => {
-        this.activeFilters.search = e.target.value.toLowerCase();
-        this.renderActiveTab();
-      });
-    }
-
-    const assigneeFilter = document.getElementById('filterAssigneeSelect');
-    if (assigneeFilter) {
-      assigneeFilter.addEventListener('change', (e) => {
-        this.activeFilters.assignee = e.target.value;
-        this.renderActiveTab();
-      });
-    }
-
-    const categoryFilter = document.getElementById('filterCategorySelect');
-    if (categoryFilter) {
-      categoryFilter.addEventListener('change', (e) => {
-        this.activeFilters.category = e.target.value;
-        this.renderActiveTab();
-      });
-    }
-
-    const priorityFilter = document.getElementById('filterPrioritySelect');
-    if (priorityFilter) {
-      priorityFilter.addEventListener('change', (e) => {
-        this.activeFilters.priority = e.target.value;
-        this.renderActiveTab();
-      });
-    }
-
-    // Clear Filters
-    const resetFiltersBtn = document.getElementById('resetFiltersBtn');
-    if (resetFiltersBtn) {
-      resetFiltersBtn.addEventListener('click', () => {
-        this.activeFilters = { assignee: 'all', category: 'all', priority: 'all', search: '' };
-        if (searchInput) searchInput.value = '';
-        if (assigneeFilter) assigneeFilter.value = 'all';
-        if (categoryFilter) categoryFilter.value = 'all';
-        if (priorityFilter) priorityFilter.value = 'all';
-        this.renderActiveTab();
-      });
-    }
-
-    // Reset Data Button (Helper to re-seed)
-    const resetDataBtn = document.getElementById('resetDataBtn');
-    if (resetDataBtn) {
-      resetDataBtn.addEventListener('click', () => {
-        if (confirm('Reset application state to initial Jira dummy data?')) {
-          localStorage.clear();
-          this.team = INITIAL_TEAM;
-          this.tasks = INITIAL_TASKS;
-          this.achievements = INITIAL_ACHIEVEMENTS;
-          this.init();
+        :root {
+            --primary-color: #2563eb;
+            --dark-bg: #0f172a;
+            --card-bg: #1e293b;
+            --text-primary: #f1f5f9;
+            --text-secondary: #cbd5e1;
         }
-      });
-    }
-  }
 
-  setActiveTab(tabName) {
-    this.activeTab = tabName;
-    document.querySelectorAll('.nav-tab').forEach(tab => {
-      if (tab.dataset.tab === tabName) {
-        tab.classList.add('bg-blue-600/20', 'text-blue-400', 'border-l-4', 'border-blue-500');
-        tab.classList.remove('text-slate-400', 'hover:bg-slate-800/50');
-      } else {
-        tab.classList.remove('bg-blue-600/20', 'text-blue-400', 'border-l-4', 'border-blue-500');
-        tab.classList.add('text-slate-400', 'hover:bg-slate-800/50');
-      }
-    });
+        body {
+            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
+            background-color: var(--dark-bg);
+            color: var(--text-primary);
+            line-height: 1.6;
+        }
 
-    document.querySelectorAll('.tab-content').forEach(content => {
-      content.classList.add('hidden');
-    });
+        body.light-theme {
+            --dark-bg: #f8fafc;
+            --card-bg: #ffffff;
+            --text-primary: #1e293b;
+            --text-secondary: #64748b;
+        }
 
-    const activeContent = document.getElementById(`tab-${tabName}`);
-    if (activeContent) {
-      activeContent.classList.remove('hidden');
-      activeContent.classList.add('animate-fade-in');
-    }
+        .container {
+            display: grid;
+            grid-template-columns: 250px 1fr;
+            min-height: 100vh;
+            gap: 1px;
+            background-color: #334155;
+        }
 
-    this.renderActiveTab();
-  }
+        /* Sidebar */
+        .sidebar {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-right: 1px solid rgba(100, 116, 139, 0.3);
+            display: flex;
+            flex-direction: column;
+            gap: 30px;
+            overflow-y: auto;
+        }
 
-  getFilteredTasks() {
-    return this.tasks.filter(task => {
-      const matchSearch = !this.activeFilters.search || 
-        task.title.toLowerCase().includes(this.activeFilters.search) ||
-        task.description.toLowerCase().includes(this.activeFilters.search) ||
-        task.id.toLowerCase().includes(this.activeFilters.search);
-      
-      const matchAssignee = this.activeFilters.assignee === 'all' || task.assignee === this.activeFilters.assignee;
-      const matchCategory = this.activeFilters.category === 'all' || task.category === this.activeFilters.category;
-      const matchPriority = this.activeFilters.priority === 'all' || task.priority === this.activeFilters.priority;
+        .logo {
+            font-size: 20px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            color: var(--primary-color);
+        }
 
-      return matchSearch && matchAssignee && matchCategory && matchPriority;
-    });
-  }
+        .nav-menu {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+        }
 
-  calculateMemberMetrics(memberName) {
-    const memberTasks = this.tasks.filter(t => t.assignee === memberName);
-    const totalAssigned = memberTasks.length;
-    const completedTasks = memberTasks.filter(t => t.status === 'Done');
-    const totalCompleted = completedTasks.length;
-    
-    const completionRate = totalAssigned > 0 ? (totalCompleted / totalAssigned) * 100 : 0;
-    
-    // Average quality rating out of 10
-    const ratedTasks = completedTasks.filter(t => t.rating !== null);
-    const avgRating = ratedTasks.length > 0 
-      ? ratedTasks.reduce((acc, t) => acc + (t.rating || 0), 0) / ratedTasks.length 
-      : 0;
+        .nav-tab {
+            padding: 12px 16px;
+            border-radius: 8px;
+            cursor: pointer;
+            font-size: 14px;
+            border: none;
+            background: none;
+            color: var(--text-secondary);
+            text-align: right;
+            transition: all 0.3s ease;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
 
-    // Efficiency Score formula: 50% completion rate + 50% quality score
-    const qualityScorePercent = (avgRating / 10) * 100;
-    const efficiencyScore = totalAssigned > 0 
-      ? Math.round((completionRate * 0.5) + (qualityScorePercent * 0.5))
-      : 0;
+        .nav-tab:hover {
+            background-color: rgba(37, 99, 235, 0.1);
+            color: var(--primary-color);
+        }
 
-    // Category breakdown
-    const categoryCounts = {
-      'Cyber Security': 0,
-      'AI': 0,
-      'Training Communication': 0,
-      'Software': 0
-    };
+        .nav-tab.active {
+            background-color: rgba(37, 99, 235, 0.2);
+            color: var(--primary-color);
+            border-left: 4px solid var(--primary-color);
+        }
 
-    completedTasks.forEach(t => {
-      if (categoryCounts[t.category] !== undefined) {
-        categoryCounts[t.category]++;
-      }
-    });
+        /* Main Content */
+        .main-content {
+            padding: 30px;
+            overflow-y: auto;
+        }
 
-    return {
-      totalAssigned,
-      totalCompleted,
-      completionRate: Math.round(completionRate),
-      avgRating: avgRating.toFixed(1),
-      efficiencyScore,
-      categoryCounts
-    };
-  }
+        .header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 30px;
+        }
 
-  calculateOverallStats() {
-    const totalTasks = this.tasks.length;
-    const completedTasks = this.tasks.filter(t => t.status === 'Done').length;
-    const inProgressTasks = this.tasks.filter(t => t.status === 'In Progress').length;
-    const inReviewTasks = this.tasks.filter(t => t.status === 'In Review').length;
-    
-    // Aggregate efficiency
-    let totalEfficiencySum = 0;
-    this.team.forEach(m => {
-      const metrics = this.calculateMemberMetrics(m.name);
-      totalEfficiencySum += metrics.efficiencyScore;
-    });
+        .header h1 {
+            font-size: 28px;
+        }
 
-    const overallEfficiency = this.team.length > 0 
-      ? Math.round(totalEfficiencySum / this.team.length)
-      : 0;
+        .header-actions {
+            display: flex;
+            gap: 15px;
+        }
 
-    // Category Distribution
-    const catCounts = {
-      'Cyber Security': 0,
-      'AI': 0,
-      'Training Communication': 0,
-      'Software': 0
-    };
+        button {
+            padding: 10px 20px;
+            border-radius: 8px;
+            border: none;
+            cursor: pointer;
+            font-weight: 600;
+            transition: all 0.3s ease;
+        }
 
-    this.tasks.forEach(t => {
-      if (catCounts[t.category] !== undefined) {
-        catCounts[t.category]++;
-      }
-    });
+        .btn-primary {
+            background-color: var(--primary-color);
+            color: white;
+        }
 
-    return {
-      totalTasks,
-      completedTasks,
-      inProgressTasks,
-      inReviewTasks,
-      overallEfficiency,
-      catCounts
-    };
-  }
+        .btn-primary:hover {
+            background-color: #1d4ed8;
+            transform: translateY(-2px);
+        }
 
-  render() {
-    this.populateFilterDropdowns();
-    this.renderActiveTab();
-  }
+        .btn-secondary {
+            background-color: var(--card-bg);
+            color: var(--text-primary);
+            border: 1px solid rgba(100, 116, 139, 0.3);
+        }
 
-  populateFilterDropdowns() {
-    const assigneeSelect = document.getElementById('filterAssigneeSelect');
-    if (assigneeSelect && assigneeSelect.options.length <= 1) {
-      this.team.forEach(m => {
-        const opt = document.createElement('option');
-        opt.value = m.name;
-        opt.textContent = m.name;
-        assigneeSelect.appendChild(opt);
-      });
-    }
+        .btn-secondary:hover {
+            background-color: rgba(37, 99, 235, 0.1);
+        }
 
-    const taskAssigneeSelect = document.getElementById('taskAssigneeSelect');
-    if (taskAssigneeSelect && taskAssigneeSelect.options.length <= 1) {
-      this.team.forEach(m => {
-        const opt = document.createElement('option');
-        opt.value = m.name;
-        opt.textContent = `${m.name} (${m.role})`;
-        taskAssigneeSelect.appendChild(opt);
-      });
-    }
-  }
+        /* Stats Cards */
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 20px;
+            margin-bottom: 30px;
+        }
 
-  renderActiveTab() {
-    if (this.activeTab === 'dashboard') {
-      this.renderDashboard();
-    } else if (this.activeTab === 'kanban') {
-      this.renderKanbanBoard();
-    } else if (this.activeTab === 'team') {
-      this.renderTeamPerformance();
-    } else if (this.activeTab === 'achievements') {
-      this.renderAchievements();
-    }
-    this.initLucideIcons();
-  }
+        .stat-card {
+            background-color: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            transition: all 0.3s ease;
+        }
 
-  /* --- 1. EXECUTIVE DASHBOARD TAB --- */
-  renderDashboard() {
-    const stats = this.calculateOverallStats();
-    
-    document.getElementById('dashOverallEfficiency').textContent = `${stats.overallEfficiency}%`;
-    document.getElementById('dashTotalTasks').textContent = stats.totalTasks;
-    document.getElementById('dashCompletedTasks').textContent = stats.completedTasks;
-    document.getElementById('dashInProgressTasks').textContent = stats.inProgressTasks + stats.inReviewTasks;
+        .stat-card:hover {
+            border-color: var(--primary-color);
+            transform: translateY(-4px);
+            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.15);
+        }
 
-    // Render Category Distribution Progress Bars
-    const catContainer = document.getElementById('dashCategoryProgressContainer');
-    if (catContainer) {
-      catContainer.innerHTML = '';
-      Object.keys(CATEGORIES).forEach(catKey => {
-        const catObj = CATEGORIES[catKey];
-        const count = stats.catCounts[catKey] || 0;
-        const pct = stats.totalTasks > 0 ? Math.round((count / stats.totalTasks) * 100) : 0;
+        .stat-label {
+            color: var(--text-secondary);
+            font-size: 12px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-bottom: 8px;
+        }
 
-        catContainer.innerHTML += `
-          <div class="space-y-1.5">
-            <div class="flex justify-between items-center text-xs">
-              <span class="font-medium text-slate-300 flex items-center gap-1.5">
-                <span class="w-2.5 h-2.5 rounded-full" style="background-color: ${catObj.color}"></span>
-                ${catKey}
-              </span>
-              <span class="font-semibold text-slate-400">${count} tasks (${pct}%)</span>
-            </div>
-            <div class="h-2 w-full bg-slate-800 rounded-full overflow-hidden">
-              <div class="h-full rounded-full transition-all duration-500" style="width: ${pct}%; background-color: ${catObj.color}"></div>
-            </div>
-          </div>
-        `;
-      });
-    }
+        .stat-value {
+            font-size: 32px;
+            font-weight: bold;
+            color: var(--primary-color);
+        }
 
-    // Top Performers Leaderboard
-    const leaderboardContainer = document.getElementById('dashLeaderboardContainer');
-    if (leaderboardContainer) {
-      leaderboardContainer.innerHTML = '';
-      
-      const memberStats = this.team.map(m => ({
-        ...m,
-        metrics: this.calculateMemberMetrics(m.name)
-      })).sort((a, b) => b.metrics.efficiencyScore - a.metrics.efficiencyScore);
+        /* Tab Content */
+        .tab-content {
+            display: none;
+        }
 
-      memberStats.forEach((m, idx) => {
-        const medal = idx === 0 ? '🥇' : idx === 1 ? '🥈' : idx === 2 ? '🥉' : `#${idx + 1}`;
-        leaderboardContainer.innerHTML += `
-          <div class="flex items-center justify-between p-3 rounded-lg bg-slate-900/50 border border-slate-800/80 hover:border-blue-500/40 transition">
-            <div class="flex items-center gap-3">
-              <span class="font-bold text-sm text-slate-400 w-6 text-center">${medal}</span>
-              <img src="${m.avatar}" class="w-9 h-9 rounded-full object-cover border border-slate-700" alt="${m.name}">
-              <div>
-                <h4 class="font-semibold text-sm text-slate-200">${m.name}</h4>
-                <p class="text-xs text-slate-400">${m.role}</p>
-              </div>
-            </div>
-            <div class="text-right">
-              <div class="text-sm font-bold text-blue-400">${m.metrics.efficiencyScore}% Efficiency</div>
-              <div class="text-xs text-slate-500">${m.metrics.totalCompleted}/${m.metrics.totalAssigned} Tasks (${m.metrics.avgRating}/10 Quality)</div>
-            </div>
-          </div>
-        `;
-      });
-    }
+        .tab-content.active {
+            display: block;
+            animation: fadeIn 0.3s ease-in-out;
+        }
 
-    // Chart.js Category Breakdown Donut Chart
-    this.renderCategoryChart(stats.catCounts);
+        @keyframes fadeIn {
+            from { opacity: 0; }
+            to { opacity: 1; }
+        }
 
-    // Mini Activity Feed
-    const feedContainer = document.getElementById('dashMiniAchievementFeed');
-    if (feedContainer) {
-      feedContainer.innerHTML = '';
-      const recent = this.achievements.slice(0, 5);
-      if (recent.length === 0) {
-        feedContainer.innerHTML = `<p class="text-xs text-slate-500 italic text-center py-4">No completed task achievements logged yet.</p>`;
-      } else {
-        recent.forEach(ach => {
-          const catObj = CATEGORIES[ach.category] || { badgeBg: 'bg-slate-700 text-slate-300' };
-          feedContainer.innerHTML += `
-            <div class="flex items-start gap-3 p-2.5 rounded-lg bg-slate-900/40 border border-slate-800/60 text-xs">
-              <div class="w-2 h-2 mt-1.5 rounded-full bg-emerald-400 shrink-0"></div>
-              <div class="space-y-0.5 flex-1">
-                <p class="text-slate-300 font-medium">
-                  <strong class="text-blue-400">${ach.assignee}</strong> completed 
-                  <span class="text-slate-100 font-semibold">"${ach.taskTitle}"</span>
-                </p>
-                <div class="flex items-center gap-2 pt-1">
-                  <span class="jira-badge ${catObj.badgeBg}">${ach.category}</span>
-                  <span class="text-emerald-400 font-bold">★ ${ach.rating}/10 Score</span>
-                  <span class="text-slate-500 ml-auto">${ach.timestamp}</span>
-                </div>
-              </div>
-            </div>
-          `;
-        });
-      }
-    }
-  }
+        /* Kanban Board */
+        .kanban-container {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 20px;
+        }
 
-  renderCategoryChart(catCounts) {
-    const canvas = document.getElementById('categoryDistributionChart');
-    if (!canvas) return;
+        .kanban-column {
+            background-color: var(--card-bg);
+            border-radius: 12px;
+            overflow: hidden;
+            display: flex;
+            flex-direction: column;
+            border: 1px solid rgba(100, 116, 139, 0.3);
+        }
 
-    if (this.categoryChart) {
-      this.categoryChart.destroy();
-    }
+        .column-header {
+            padding: 15px;
+            background-color: rgba(37, 99, 235, 0.1);
+            border-bottom: 2px solid var(--primary-color);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
 
-    const labels = Object.keys(catCounts);
-    const dataValues = Object.values(catCounts);
-    const bgColors = labels.map(l => CATEGORIES[l]?.color || '#94A3B8');
+        .column-header h3 {
+            font-size: 14px;
+            font-weight: 600;
+        }
 
-    this.categoryChart = new Chart(canvas, {
-      type: 'doughnut',
-      data: {
-        labels: labels,
-        datasets: [{
-          data: dataValues,
-          backgroundColor: bgColors,
-          borderColor: '#0F172A',
-          borderWidth: 3,
-          hoverOffset: 6
-        }]
-      },
-      options: {
-        responsive: true,
-        maintainAspectRatio: false,
-        plugins: {
-          legend: {
-            position: 'bottom',
-            labels: {
-              color: '#94A3B8',
-              font: { family: 'Plus Jakarta Sans', size: 11 },
-              padding: 14
+        .column-count {
+            background-color: var(--primary-color);
+            color: white;
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 12px;
+        }
+
+        .column-body {
+            padding: 15px;
+            flex: 1;
+            overflow-y: auto;
+            min-height: 400px;
+        }
+
+        .task-card {
+            background-color: rgba(51, 65, 85, 0.5);
+            padding: 12px;
+            border-radius: 8px;
+            margin-bottom: 12px;
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            cursor: grab;
+            transition: all 0.3s ease;
+        }
+
+        .task-card:hover {
+            border-color: var(--primary-color);
+            transform: translateX(-4px);
+            box-shadow: 0 8px 16px rgba(37, 99, 235, 0.1);
+        }
+
+        .task-card.dragging {
+            opacity: 0.5;
+            transform: rotate(2deg);
+        }
+
+        .task-title {
+            font-weight: 600;
+            font-size: 14px;
+            margin-bottom: 8px;
+        }
+
+        .task-meta {
+            display: flex;
+            gap: 8px;
+            font-size: 11px;
+            color: var(--text-secondary);
+        }
+
+        /* Modal Styles */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.7);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal.active {
+            display: flex;
+        }
+
+        .modal-content {
+            background-color: var(--card-bg);
+            padding: 30px;
+            border-radius: 12px;
+            max-width: 500px;
+            width: 90%;
+            max-height: 90vh;
+            overflow-y: auto;
+            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .modal-header h2 {
+            font-size: 20px;
+        }
+
+        .close-btn {
+            background: none;
+            border: none;
+            color: var(--text-primary);
+            font-size: 24px;
+            cursor: pointer;
+            padding: 0;
+            width: 30px;
+            height: 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-size: 14px;
+            font-weight: 600;
+        }
+
+        .form-group input,
+        .form-group select,
+        .form-group textarea {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid rgba(100, 116, 139, 0.3);
+            border-radius: 8px;
+            background-color: rgba(51, 65, 85, 0.5);
+            color: var(--text-primary);
+            font-family: inherit;
+        }
+
+        .form-group textarea {
+            resize: vertical;
+            min-height: 80px;
+        }
+
+        /* Badge Styles */
+        .badge {
+            display: inline-block;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 600;
+        }
+
+        .badge-high { background-color: rgba(220, 38, 38, 0.2); color: #fca5a5; }
+        .badge-medium { background-color: rgba(217, 119, 6, 0.2); color: #fdba74; }
+        .badge-low { background-color: rgba(34, 197, 94, 0.2); color: #86efac; }
+
+        /* Responsive */
+        @media (max-width: 768px) {
+            .container {
+                grid-template-columns: 1fr;
             }
-          }
-        },
-        cutout: '70%'
-      }
-    });
-  }
 
-  /* --- 2. KANBAN BOARD TAB --- */
-  renderKanbanBoard() {
-    const filteredTasks = this.getFilteredTasks();
-    const columns = {
-      'To Do': document.getElementById('col-todo'),
-      'In Progress': document.getElementById('col-in-progress'),
-      'In Review': document.getElementById('col-in-review'),
-      'Done': document.getElementById('col-done')
-    };
+            .sidebar {
+                border-right: none;
+                border-bottom: 1px solid rgba(100, 116, 139, 0.3);
+                flex-direction: row;
+                overflow-x: auto;
+                gap: 10px;
+                padding: 10px;
+            }
 
-    // Column Counters
-    const counts = { 'To Do': 0, 'In Progress': 0, 'In Review': 0, 'Done': 0 };
+            .nav-menu {
+                flex-direction: row;
+                gap: 10px;
+            }
 
-    Object.keys(columns).forEach(colName => {
-      if (columns[colName]) {
-        columns[colName].innerHTML = '';
-      }
-    });
+            .kanban-container {
+                grid-template-columns: 1fr;
+            }
 
-    filteredTasks.forEach(task => {
-      const colKey = task.status === 'Backlog / To Do' ? 'To Do' : task.status;
-      const targetCol = columns[colKey] || columns['To Do'];
-      if (counts[colKey] !== undefined) counts[colKey]++;
+            .stats-grid {
+                grid-template-columns: 1fr;
+            }
+        }
 
-      const memberObj = this.team.find(m => m.name === task.assignee) || { avatar: 'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?w=150' };
-      const catObj = CATEGORIES[task.category] || { badgeBg: 'bg-slate-700 text-slate-200' };
-
-      const priorityClass = task.priority === 'High' ? 'priority-high' : task.priority === 'Medium' ? 'priority-medium' : 'priority-low';
-
-      const taskCard = document.createElement('div');
-      taskCard.className = 'task-card glass-card p-3.5 rounded-xl border border-slate-700/80 mb-3 text-xs space-y-2.5 animate-fade-in';
-      taskCard.setAttribute('draggable', 'true');
-      taskCard.dataset.taskId = task.id;
-
-      taskCard.innerHTML = `
-        <div class="flex items-center justify-between gap-2">
-          <span class="jira-badge ${catObj.badgeBg}">${task.category}</span>
-          <span class="jira-badge ${priorityClass}">${task.priority}</span>
-        </div>
-        <div>
-          <h4 class="font-semibold text-sm text-slate-100 leading-snug line-clamp-2">${task.title}</h4>
-          <p class="text-slate-400 mt-1 line-clamp-2">${task.description}</p>
-        </div>
-        <div class="flex items-center justify-between pt-2 border-t border-slate-800/80">
-          <div class="flex items-center gap-2">
-            <img src="${memberObj.avatar}" class="w-6 h-6 rounded-full object-cover border border-slate-600" title="${task.assignee}" alt="${task.assignee}">
-            <span class="font-medium text-slate-300 text-xs">${task.assignee}</span>
-          </div>
-          <div class="flex items-center gap-1.5 text-slate-400 font-mono text-[11px]">
-            <span>Weight: <strong class="text-amber-400">${task.qualityWeight}/10</strong></span>
-          </div>
-        </div>
-        <div class="flex items-center justify-between text-[11px] text-slate-500 pt-1">
-          <span>${task.id}</span>
-          <span>Due: ${task.dueDate}</span>
-        </div>
-        <div class="pt-1 flex justify-end gap-1.5">
-          <select class="quick-status-select bg-slate-900 border border-slate-700 text-slate-300 rounded px-1.5 py-0.5 text-[11px] outline-none" data-task-id="${task.id}">
-            <option value="To Do" ${task.status === 'To Do' || task.status === 'Backlog / To Do' ? 'selected' : ''}>To Do</option>
-            <option value="In Progress" ${task.status === 'In Progress' ? 'selected' : ''}>In Progress</option>
-            <option value="In Review" ${task.status === 'In Review' ? 'selected' : ''}>In Review</option>
-            <option value="Done" ${task.status === 'Done' ? 'selected' : ''}>Done</option>
-          </select>
-        </div>
-      `;
-
-      // Drag and Drop events
-      taskCard.addEventListener('dragstart', (e) => {
-        e.dataTransfer.setData('text/plain', task.id);
-        taskCard.classList.add('dragging');
-      });
-
-      taskCard.addEventListener('dragend', () => {
-        taskCard.classList.remove('dragging');
-      });
-
-      if (targetCol) {
-        targetCol.appendChild(taskCard);
-      }
-    });
-
-    // Update Headers Counter Badges
-    document.getElementById('count-todo').textContent = counts['To Do'];
-    document.getElementById('count-in-progress').textContent = counts['In Progress'];
-    document.getElementById('count-in-review').textContent = counts['In Review'];
-    document.getElementById('count-done').textContent = counts['Done'];
-
-    // Column Drag and Drop Handlers
-    document.querySelectorAll('.kanban-column-body').forEach(col => {
-      col.addEventListener('dragover', (e) => {
-        e.preventDefault();
-        col.parentElement.classList.add('drag-over');
-      });
-
-      col.addEventListener('dragleave', () => {
-        col.parentElement.classList.remove('drag-over');
-      });
-
-      col.addEventListener('drop', (e) => {
-        e.preventDefault();
-        col.parentElement.classList.remove('drag-over');
-        const taskId = e.dataTransfer.getData('text/plain');
-        const newStatus = col.dataset.status;
-        this.updateTaskStatus(taskId, newStatus);
-      });
-    });
-
-    // Quick Select Listener
-    document.querySelectorAll('.quick-status-select').forEach(select => {
-      select.addEventListener('change', (e) => {
-        const taskId = e.target.dataset.taskId;
-        const newStatus = e.target.value;
-        this.updateTaskStatus(taskId, newStatus);
-      });
-    });
-  }
-
-  updateTaskStatus(taskId, newStatus) {
-    const task = this.tasks.find(t => t.id === taskId);
-    if (!task) return;
-
-    if (newStatus === 'Done' && task.status !== 'Done') {
-      // Trigger Manager Quality Evaluation Modal before setting Done
-      this.openRatingModal(task);
-      return;
-    }
-
-    task.status = newStatus;
-    this.saveState();
-    this.renderActiveTab();
-  }
-
-  /* --- 3. TEAM MEMBERS & EFFICIENCY TAB --- */
-  renderTeamPerformance() {
-    const container = document.getElementById('teamCardsGrid');
-    if (!container) return;
-
-    container.innerHTML = '';
-
-    this.team.forEach(member => {
-      const metrics = this.calculateMemberMetrics(member.name);
-      
-      let effColor = 'text-emerald-400';
-      if (metrics.efficiencyScore < 60) effColor = 'text-rose-400';
-      else if (metrics.efficiencyScore < 80) effColor = 'text-amber-400';
-
-      container.innerHTML += `
-        <div class="glass-card p-5 rounded-2xl border border-slate-800 space-y-4 hover:border-blue-500/50 transition">
-          <div class="flex items-center gap-3.5">
-            <img src="${member.avatar}" class="w-12 h-12 rounded-full object-cover border-2 border-blue-500/40" alt="${member.name}">
-            <div>
-              <h3 class="font-bold text-base text-slate-100">${member.name}</h3>
-              <p class="text-xs text-slate-400">${member.role}</p>
-              <p class="text-[11px] text-slate-500">${member.email}</p>
+        .space-y-4 > * + * {
+            margin-top: 16px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <!-- Sidebar -->
+        <aside class="sidebar">
+            <div class="logo">
+                <span>📊</span>
+                GasTrack
             </div>
-          </div>
+            <nav class="nav-menu">
+                <button class="nav-tab active" data-tab="dashboard">📈 لوحة التحكم</button>
+                <button class="nav-tab" data-tab="kanban">📋 لوحة كانبان</button>
+                <button class="nav-tab" data-tab="team">👥 الفريق</button>
+                <button class="nav-tab" data-tab="achievements">🏆 الإنجازات</button>
+            </nav>
+        </aside>
 
-          <div class="grid grid-cols-2 gap-2 pt-2 border-t border-slate-800">
-            <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800 text-center">
-              <span class="text-[11px] text-slate-400 block">Efficiency Rating</span>
-              <span class="text-xl font-extrabold ${effColor}">${metrics.efficiencyScore}%</span>
+        <!-- Main Content -->
+        <main class="main-content">
+            <div class="header">
+                <h1>GasTrack - مدير المشاريع</h1>
+                <div class="header-actions">
+                    <button class="btn-primary" id="openCreateTaskModalBtn">+ مهمة جديدة</button>
+                    <button class="btn-secondary" id="themeToggleBtn">🌙 وضع داكن</button>
+                </div>
             </div>
-            <div class="bg-slate-900/60 p-2.5 rounded-xl border border-slate-800 text-center">
-              <span class="text-[11px] text-slate-400 block">Quality Avg</span>
-              <span class="text-xl font-extrabold text-amber-400">${metrics.avgRating}/10</span>
-            </div>
-          </div>
 
-          <div class="space-y-1.5 text-xs">
-            <div class="flex justify-between text-slate-400">
-              <span>Task Completion</span>
-              <span class="font-semibold text-slate-200">${metrics.totalCompleted} / ${metrics.totalAssigned} (${metrics.completionRate}%)</span>
-            </div>
-            <div class="h-2 w-full bg-slate-900 rounded-full overflow-hidden border border-slate-800">
-              <div class="h-full bg-blue-500 rounded-full" style="width: ${metrics.completionRate}%"></div>
-            </div>
-          </div>
+            <!-- Dashboard Tab -->
+            <div class="tab-content active" id="tab-dashboard">
+                <div class="stats-grid">
+                    <div class="stat-card">
+                        <div class="stat-label">الكفاءة الإجمالية</div>
+                        <div class="stat-value" id="dashOverallEfficiency">0%</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">إجمالي المهام</div>
+                        <div class="stat-value" id="dashTotalTasks">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">المهام المكتملة</div>
+                        <div class="stat-value" id="dashCompletedTasks">0</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-label">قيد المراجعة</div>
+                        <div class="stat-value" id="dashInProgressTasks">0</div>
+                    </div>
+                </div>
 
-          <div class="pt-2 border-t border-slate-800/80 space-y-2">
-            <span class="text-[11px] font-semibold text-slate-400 block">Completed Work by Category:</span>
-            <div class="grid grid-cols-2 gap-1.5 text-[11px]">
-              <div class="flex items-center justify-between px-2 py-1 rounded bg-rose-500/10 text-rose-300">
-                <span>Cyber</span>
-                <span class="font-bold">${metrics.categoryCounts['Cyber Security']}</span>
-              </div>
-              <div class="flex items-center justify-between px-2 py-1 rounded bg-purple-500/10 text-purple-300">
-                <span>AI</span>
-                <span class="font-bold">${metrics.categoryCounts['AI']}</span>
-              </div>
-              <div class="flex items-center justify-between px-2 py-1 rounded bg-amber-500/10 text-amber-300">
-                <span>Training</span>
-                <span class="font-bold">${metrics.categoryCounts['Training Communication']}</span>
-              </div>
-              <div class="flex items-center justify-between px-2 py-1 rounded bg-blue-500/10 text-blue-300">
-                <span>Software</span>
-                <span class="font-bold">${metrics.categoryCounts['Software']}</span>
-              </div>
+                <div class="stat-card">
+                    <div style="padding: 20px;">
+                        <h3 style="margin-bottom: 20px;">توزيع الفئات</h3>
+                        <div id="dashCategoryProgressContainer" class="space-y-4"></div>
+                    </div>
+                </div>
+
+                <div style="margin-top: 30px;">
+                    <div class="stat-card">
+                        <div style="padding: 20px;">
+                            <h3 style="margin-bottom: 20px;">أفضل الأداء</h3>
+                            <div id="dashLeaderboardContainer" class="space-y-4"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
-          </div>
+
+            <!-- Kanban Tab -->
+            <div class="tab-content" id="tab-kanban">
+                <div class="kanban-container">
+                    <div class="kanban-column">
+                        <div class="column-header">
+                            <h3>مهام جديدة</h3>
+                            <span class="column-count" id="count-todo">0</span>
+                        </div>
+                        <div class="column-body kanban-column-body" id="col-todo" data-status="To Do"></div>
+                    </div>
+                    <div class="kanban-column">
+                        <div class="column-header">
+                            <h3>قيد التنفيذ</h3>
+                            <span class="column-count" id="count-in-progress">0</span>
+                        </div>
+                        <div class="column-body kanban-column-body" id="col-in-progress" data-status="In Progress"></div>
+                    </div>
+                    <div class="kanban-column">
+                        <div class="column-header">
+                            <h3>قيد المراجعة</h3>
+                            <span class="column-count" id="count-in-review">0</span>
+                        </div>
+                        <div class="column-body kanban-column-body" id="col-in-review" data-status="In Review"></div>
+                    </div>
+                    <div class="kanban-column">
+                        <div class="column-header">
+                            <h3>مكتملة</h3>
+                            <span class="column-count" id="count-done">0</span>
+                        </div>
+                        <div class="column-body kanban-column-body" id="col-done" data-status="Done"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Team Tab -->
+            <div class="tab-content" id="tab-team">
+                <div class="stats-grid" id="teamCardsGrid"></div>
+            </div>
+
+            <!-- Achievements Tab -->
+            <div class="tab-content" id="tab-achievements">
+                <div id="achievementHistoryList" class="space-y-4"></div>
+            </div>
+        </main>
+    </div>
+
+    <!-- Create Task Modal -->
+    <div class="modal" id="createTaskModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>مهمة جديدة</h2>
+                <button class="close-btn" id="closeCreateTaskModalBtn">&times;</button>
+            </div>
+            <form id="createTaskForm">
+                <div class="form-group">
+                    <label>عنوان المهمة *</label>
+                    <input type="text" id="taskTitleInput" required>
+                </div>
+                <div class="form-group">
+                    <label>الوصف</label>
+                    <textarea id="taskDescInput"></textarea>
+                </div>
+                <div class="form-group">
+                    <label>الفئة *</label>
+                    <select id="taskCategorySelect" required>
+                        <option>Cyber Security</option>
+                        <option>AI</option>
+                        <option>Training Communication</option>
+                        <option>Software</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>المسؤول *</label>
+                    <select id="taskAssigneeSelect" required></select>
+                </div>
+                <div class="form-group">
+                    <label>الأولوية</label>
+                    <select id="taskPrioritySelect">
+                        <option>Low</option>
+                        <option>Medium</option>
+                        <option>High</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>تاريخ الاستحقاق *</label>
+                    <input type="date" id="taskDueDateInput" required>
+                </div>
+                <div class="form-group">
+                    <label>وزن الجودة (1-10)</label>
+                    <input type="number" id="taskWeightInput" min="1" max="10" value="5">
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%;">إنشاء المهمة</button>
+            </form>
         </div>
-      `;
-    });
-  }
+    </div>
 
-  /* --- 4. ACHIEVEMENT HISTORY LOG TAB --- */
-  renderAchievements() {
-    const listContainer = document.getElementById('achievementHistoryList');
-    if (!listContainer) return;
-
-    listContainer.innerHTML = '';
-
-    if (this.achievements.length === 0) {
-      listContainer.innerHTML = `
-        <div class="text-center py-12 text-slate-500">
-          <i data-lucide="award" class="w-12 h-12 mx-auto mb-2 opacity-50"></i>
-          <p>No task completion achievements logged yet.</p>
-        </div>
-      `;
-      return;
-    }
-
-    this.achievements.forEach(ach => {
-      const catObj = CATEGORIES[ach.category] || { badgeBg: 'bg-slate-700 text-slate-200' };
-
-      listContainer.innerHTML += `
-        <div class="glass-card p-4 rounded-xl border border-slate-800 flex items-start gap-4 hover:border-emerald-500/40 transition">
-          <div class="w-10 h-10 rounded-xl bg-emerald-500/15 border border-emerald-500/30 flex items-center justify-center text-emerald-400 shrink-0">
-            <i data-lucide="check-circle-2" class="w-5 h-5"></i>
-          </div>
-          <div class="flex-1 space-y-1">
-            <div class="flex items-center justify-between">
-              <span class="jira-badge ${catObj.badgeBg}">${ach.category}</span>
-              <span class="text-xs text-slate-500 font-mono">${ach.timestamp}</span>
+    <!-- Rating Modal -->
+    <div class="modal" id="ratingModal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h2>تقييم الجودة</h2>
+                <button class="close-btn" id="closeRatingModalBtn">&times;</button>
             </div>
-            <h4 class="font-semibold text-sm text-slate-100">
-              <strong class="text-blue-400 font-bold">${ach.assignee}</strong> completed task 
-              <span class="text-slate-200 font-semibold">"${ach.taskTitle}"</span> (${ach.taskId})
-            </h4>
-            <div class="flex items-center gap-4 pt-1 text-xs text-slate-400">
-              <span>Manager Quality Score: <strong class="text-amber-400 font-bold">${ach.rating}/10</strong></span>
-              <span>Expected Weight: <strong class="text-slate-300 font-medium">${ach.qualityWeight}/10</strong></span>
-            </div>
-          </div>
+            <form id="ratingForm">
+                <div style="padding: 15px; background-color: rgba(37, 99, 235, 0.1); border-radius: 8px; margin-bottom: 20px;">
+                    <p style="margin-bottom: 8px;"><strong>المهمة:</strong> <span id="ratingTaskTitle"></span></p>
+                    <p style="margin-bottom: 8px;"><strong>المسؤول:</strong> <span id="ratingAssignee"></span></p>
+                    <p><strong>وزن الجودة المتوقع:</strong> <span id="ratingWeight"></span></p>
+                </div>
+                <div class="form-group">
+                    <label>تقييم الجودة (1-10) *</label>
+                    <input type="number" id="qualityRatingInput" min="1" max="10" value="10" required>
+                </div>
+                <button type="submit" class="btn-primary" style="width: 100%;">حفظ التقييم</button>
+            </form>
         </div>
-      `;
-    });
-  }
+    </div>
 
-  /* --- MANAGER MODALS & FORM LOGIC --- */
-  openCreateModal() {
-    const modal = document.getElementById('createTaskModal');
-    if (modal) {
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-    }
-  }
+    <!-- Data Configuration -->
+    <script>
+        const CATEGORIES = {
+            'Cyber Security': { color: '#ef4444', badgeBg: 'badge-high' },
+            'AI': { color: '#a855f7', badgeBg: 'badge-review' },
+            'Training Communication': { color: '#f59e0b', badgeBg: 'badge-medium' },
+            'Software': { color: '#3b82f6', badgeBg: 'badge-progress' }
+        };
 
-  closeCreateModal() {
-    const modal = document.getElementById('createTaskModal');
-    if (modal) {
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
-  }
+        const INITIAL_TEAM = [
+            { name: 'أحمد محمد', role: 'مهندس', email: 'ahmed@egas.com', avatar: 'https://i.pravatar.cc/150?img=1' },
+            { name: 'فاطمة علي', role: 'محلل', email: 'fatima@egas.com', avatar: 'https://i.pravatar.cc/150?img=2' },
+            { name: 'محمود حسن', role: 'مطور', email: 'mahmoud@egas.com', avatar: 'https://i.pravatar.cc/150?img=3' }
+        ];
 
-  handleCreateTask(e) {
-    e.preventDefault();
+        const INITIAL_TASKS = [
+            { id: 'GT-101', title: 'تطوير نظام الأمان', description: 'تحسين بروتوكولات الأمان', category: 'Cyber Security', assignee: 'أحمد محمد', priority: 'High', status: 'In Progress', dueDate: '2026-12-31', qualityWeight: 9, rating: null },
+            { id: 'GT-102', title: 'بناء نموذج الذكاء الاصطناعي', description: 'تطوير نموذج تعلم الآلة', category: 'AI', assignee: 'فاطمة علي', priority: 'High', status: 'To Do', dueDate: '2026-12-25', qualityWeight: 8, rating: null }
+        ];
 
-    const title = document.getElementById('taskTitleInput').value.trim();
-    const description = document.getElementById('taskDescInput').value.trim();
-    const category = document.getElementById('taskCategorySelect').value;
-    const assignee = document.getElementById('taskAssigneeSelect').value;
-    const priority = document.getElementById('taskPrioritySelect').value;
-    const dueDate = document.getElementById('taskDueDateInput').value;
-    const qualityWeight = parseInt(document.getElementById('taskWeightInput').value) || 5;
+        const INITIAL_ACHIEVEMENTS = [];
+    </script>
 
-    if (!title || !category || !assignee || !dueDate) {
-      alert('Please fill out all required fields.');
-      return;
-    }
-
-    const nextIdNumber = this.tasks.length + 101;
-    const newTask = {
-      id: `GT-${nextIdNumber}`,
-      title,
-      description,
-      category,
-      assignee,
-      priority,
-      dueDate,
-      qualityWeight,
-      status: 'To Do',
-      rating: null,
-      createdAt: new Date().toISOString().split('T')[0],
-      completedAt: null
-    };
-
-    this.tasks.unshift(newTask);
-    this.saveState();
-    this.closeCreateModal();
-    document.getElementById('createTaskForm').reset();
-    this.renderActiveTab();
-  }
-
-  openRatingModal(task) {
-    this.pendingCompletionTaskId = task.id;
-    document.getElementById('ratingTaskTitle').textContent = `"${task.title}" (${task.id})`;
-    document.getElementById('ratingAssignee').textContent = task.assignee;
-    document.getElementById('ratingWeight').textContent = `${task.qualityWeight}/10`;
-
-    const modal = document.getElementById('ratingModal');
-    if (modal) {
-      modal.classList.remove('hidden');
-      modal.classList.add('flex');
-    }
-  }
-
-  closeRatingModal() {
-    this.pendingCompletionTaskId = null;
-    const modal = document.getElementById('ratingModal');
-    if (modal) {
-      modal.classList.add('hidden');
-      modal.classList.remove('flex');
-    }
-  }
-
-  handleRatingSubmit(e) {
-    e.preventDefault();
-    if (!this.pendingCompletionTaskId) return;
-
-    const task = this.tasks.find(t => t.id === this.pendingCompletionTaskId);
-    if (!task) return;
-
-    const rating = parseInt(document.getElementById('qualityRatingInput').value) || 10;
-    
-    task.status = 'Done';
-    task.rating = rating;
-    task.completedAt = new Date().toISOString().split('T')[0];
-
-    // Log Achievement
-    const newAchievement = {
-      id: `ach-${Date.now()}`,
-      taskId: task.id,
-      taskTitle: task.title,
-      assignee: task.assignee,
-      category: task.category,
-      rating: rating,
-      qualityWeight: task.qualityWeight,
-      timestamp: new Date().toLocaleString()
-    };
-
-    this.achievements.unshift(newAchievement);
-    this.saveState();
-    this.closeRatingModal();
-
-    // Trigger Confetti Cheer Animation
-    if (window.confetti) {
-      window.confetti({
-        particleCount: 80,
-        spread: 70,
-        origin: { y: 0.6 }
-      });
-    }
-
-    this.renderActiveTab();
-  }
-}
-
-// Global App Instance Initializer
-document.addEventListener('DOMContentLoaded', () => {
-  window.app = new GasTrackApp();
-});
+    <!-- Application Logic -->
+    <script src="app.js"></script>
+</body>
+</html>
