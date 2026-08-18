@@ -158,6 +158,17 @@
 
         const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        // 1. فحص الجلسة الحالية أول ما الصفحة تفتح
+        async function checkExistingSession() {
+            const { data: { session } } = await _supabase.auth.getSession();
+            if (session) {
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('userEmail', session.user.email);
+                window.location.replace('index.html');
+            }
+        }
+        checkExistingSession();
+
         let isSignUpMode = false;
 
         const authForm = document.getElementById('authForm');
@@ -182,8 +193,8 @@
 
         authForm.addEventListener('submit', async (e) => {
             e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
+            const email = document.getElementById('email').value.trim();
+            const password = document.getElementById('password').value.trim();
 
             showAlert('جاري الاتصال بالسيرفر...', 'success');
 
@@ -192,7 +203,7 @@
                 if (error) {
                     showAlert(error.message, 'error');
                 } else {
-                    showAlert('تم إنشاء الحساب! يمكنك الآن تسجيل الدخول.', 'success');
+                    showAlert('تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول.', 'success');
                 }
             } else {
                 const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
@@ -202,9 +213,8 @@
                     showAlert('تم تسجيل الدخول بنجاح! جاري تحويلك للمنظومة...', 'success');
                     localStorage.setItem('isLoggedIn', 'true');
                     localStorage.setItem('userEmail', email);
-                    setTimeout(() => {
-                        window.location.href = 'index.html';
-                    }, 500);
+                    // توجيه مباشر ومضمون
+                    window.location.replace('index.html');
                 }
             }
         });
