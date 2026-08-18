@@ -1,258 +1,212 @@
 <!DOCTYPE html>
-<html dir="rtl" lang="ar">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تسجيل الدخول - IT EGAS</title>
-    <!-- مكتبة Supabase الرسمية -->
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <title>إنشاء حساب جديد / تسجيل الدخول</title>
     <style>
         * {
             box-sizing: border-box;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
             margin: 0;
             padding: 0;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
         body {
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background-color: #7b93f7;
             display: flex;
             justify-content: center;
             align-items: center;
             min-height: 100vh;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
-        .container {
-            width: 100%;
-            max-width: 400px;
-            padding: 20px;
         }
 
         .login-card {
             background: #ffffff;
-            padding: 40px;
-            border-radius: 15px;
-            box-shadow: 0 12px 40px rgba(0,0,0,0.2);
+            padding: 40px 30px;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 400px;
             text-align: center;
         }
 
-        .logo {
-            font-size: 48px;
+        .icon-container {
+            font-size: 50px;
             margin-bottom: 15px;
         }
 
-        .login-card h2 {
-            margin-bottom: 10px;
-            color: #1e293b;
+        .title {
             font-size: 24px;
+            font-weight: bold;
+            color: #2d3748;
+            margin-bottom: 8px;
         }
 
-        .login-card p {
-            color: #64748b;
+        .subtitle {
             font-size: 14px;
-            margin-bottom: 30px;
+            color: #a0aec0;
+            margin-bottom: 25px;
         }
 
-        .form-group {
+        .alert-box {
+            padding: 10px 15px;
+            border-radius: 8px;
+            font-size: 14px;
+            margin-bottom: 20px;
+            display: none;
+        }
+
+        .alert-error {
+            background-color: #fed7d7;
+            color: #c53030;
+            border: 1px solid #feb2b2;
+        }
+
+        .alert-success {
+            background-color: #c6f6d5;
+            color: #22543d;
+            border: 1px solid #9ae6b4;
+        }
+
+        .input-group {
             margin-bottom: 18px;
             text-align: right;
         }
 
-        .form-group label {
+        .input-group label {
             display: block;
-            margin-bottom: 8px;
-            color: #475569;
             font-size: 13px;
-            font-weight: 600;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
+            color: #718096;
+            margin-bottom: 6px;
         }
 
-        .form-group input {
+        .input-group input {
             width: 100%;
             padding: 12px 15px;
-            border: 2px solid #e2e8f0;
+            background-color: #f7fafc;
+            border: 1px solid #e2e8f0;
             border-radius: 8px;
-            font-size: 14px;
-            transition: all 0.3s ease;
-            background-color: #f8fafc;
+            font-size: 15px;
+            outline: none;
+            transition: border-color 0.2s;
+            text-align: left;
+            direction: ltr;
         }
 
-        .form-group input:focus {
-            outline: none;
+        .input-group input:focus {
             border-color: #667eea;
-            background-color: #ffffff;
-            box-shadow: 0 0 0 3px rgba(102, 126, 234, 0.1);
+            background-color: #fff;
         }
 
         .btn-submit {
             width: 100%;
             padding: 12px;
-            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            background: linear-gradient(135deg, #a3b8ff 0%, #8092f6 100%);
             color: white;
             border: none;
             border-radius: 8px;
             font-size: 16px;
-            font-weight: 600;
+            font-weight: bold;
             cursor: pointer;
-            transition: all 0.3s ease;
+            transition: opacity 0.2s;
             margin-top: 10px;
         }
 
         .btn-submit:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 8px 20px rgba(102, 126, 234, 0.3);
+            opacity: 0.9;
         }
 
-        .btn-submit:active {
-            transform: translateY(0);
-        }
-
-        .toggle-mode {
+        .footer-text {
             margin-top: 20px;
             font-size: 13px;
-            color: #64748b;
+            color: #a0aec0;
         }
 
-        .toggle-mode a {
+        .footer-text a {
             color: #667eea;
             text-decoration: none;
-            font-weight: 600;
-            cursor: pointer;
-            transition: color 0.3s ease;
-        }
-
-        .toggle-mode a:hover {
-            color: #764ba2;
-            text-decoration: underline;
-        }
-
-        #alert-box {
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 15px;
-            display: none;
-            font-size: 13px;
-            font-weight: 500;
-        }
-
-        .error { 
-            background-color: #fee2e2; 
-            color: #dc2626; 
-            border: 2px solid #fecaca; 
-        }
-
-        .success { 
-            background-color: #dcfce7; 
-            color: #16a34a; 
-            border: 2px solid #bbf7d0; 
+            font-weight: bold;
         }
     </style>
 </head>
 <body>
-    <div class="container">
-        <div class="login-card">
-            <div class="logo">🔐</div>
-            <h2 id="form-title">تسجيل الدخول</h2>
-            <p id="form-subtitle">مرحباً بك في نظام IT EGAS</p>
-            
-            <div id="alert-box"></div>
 
-            <form id="authForm">
-                <div class="form-group">
-                    <label for="email">البريد الإلكتروني</label>
-                    <input type="email" id="email" required placeholder="example@mail.com">
-                </div>
-                
-                <div class="form-group">
-                    <label for="password">كلمة السر</label>
-                    <input type="password" id="password" required placeholder="••••••••">
-                </div>
+    <div class="login-card">
+        <div class="icon-container">🔒</div>
+        <h2 class="title">إنشاء حساب جديد</h2>
+        <p class="subtitle">انضم إلى فريقنا الآن</p>
 
-                <button type="submit" class="btn-submit" id="btn-text">دخول</button>
-            </form>
+        <!-- صندوق رسائل الخطأ والنجاح -->
+        <div id="alertBox" class="alert-box"></div>
 
-            <div class="toggle-mode">
-                <span id="toggle-text">ليس لديك حساب؟</span> 
-                <a href="#" id="toggle-btn">إنشاء حساب جديد</a>
+        <form id="loginForm">
+            <div class="input-group">
+                <label for="email">البريد الإلكتروني</label>
+                <input 
+                    type="email" 
+                    id="email" 
+                    value="mahmoudelsebaey128@gmail.com" 
+                    required 
+                    placeholder="example@gmail.com"
+                >
             </div>
+
+            <div class="input-group">
+                <label for="password">كلمة السر</label>
+                <input 
+                    type="password" 
+                    id="password" 
+                    value="123456" 
+                    required 
+                    placeholder="••••••"
+                >
+            </div>
+
+            <button type="submit" class="btn-submit">إنشاء الحساب / الدخول</button>
+        </form>
+
+        <div class="footer-text">
+            لديك حساب بالفعل؟ <a href="#" id="toggleLink">تسجيل الدخول</a>
         </div>
     </div>
 
     <script>
-        // إعدادات Supabase
-        const SUPABASE_URL = 'https://fkowcbpcwzlzedjecfwg.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrb3djYnBjd3psemVkamVjZndnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNTg4NzUsImV4cCI6MjEwMjYzNDg3NX0.E1z5O5N3q-5V5O5N3q-5V5O5N3q-5V5O5N3q5';
-
-        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-        let isSignUpMode = false;
-
-        const authForm = document.getElementById('authForm');
-        const formTitle = document.getElementById('form-title');
-        const formSubtitle = document.getElementById('form-subtitle');
-        const btnText = document.getElementById('btn-text');
-        const toggleText = document.getElementById('toggle-text');
-        const toggleBtn = document.getElementById('toggle-btn');
-        const alertBox = document.getElementById('alert-box');
-
-        toggleBtn.addEventListener('click', (e) => {
+        document.getElementById('loginForm').addEventListener('submit', function(e) {
             e.preventDefault();
-            isSignUpMode = !isSignUpMode;
+
+            const emailInput = document.getElementById('email').value.trim();
+            const passwordInput = document.getElementById('password').value.trim();
+            const alertBox = document.getElementById('alertBox');
+
+            // البيانات المعتمدة للتسجيل الدخول
+            const validEmail = "mahmoudelsebaey128@gmail.com";
+            const validPassword = "123456";
+
+            // إخفاء صندوق التنبيهات مع كل تجربة جديدة
             alertBox.style.display = 'none';
-            
-            if (isSignUpMode) {
-                formTitle.innerText = 'إنشاء حساب جديد';
-                formSubtitle.innerText = 'انضم إلى فريقنا الآن';
-                btnText.innerText = 'إنشاء الحساب';
-                toggleText.innerText = 'لديك حساب بالفعل؟';
-                toggleBtn.innerText = 'تسجيل الدخول';
+            alertBox.className = 'alert-box';
+
+            // التحقق من صحة البيانات
+            if (emailInput === validEmail && passwordInput === validPassword) {
+                alertBox.classList.add('alert-success');
+                alertBox.innerText = "تم تسجيل الدخول بنجاح! جاري التحويل...";
+                alertBox.style.display = 'block';
+
+                // حفظ الجلسة محلياً في المتصفح
+                localStorage.setItem('isLoggedIn', 'true');
+                localStorage.setItem('userEmail', emailInput);
+
+                // التوجيه للصفحة الرئيسية للمشروع بعد ثانية واحدة
+                setTimeout(() => {
+                    window.location.href = "index.html"; // غيّر اسم الصفحة هنا إذا كان اسمها مختلف
+                }, 1000);
+
             } else {
-                formTitle.innerText = 'تسجيل الدخول';
-                formSubtitle.innerText = 'مرحباً بك في نظام IT EGAS';
-                btnText.innerText = 'دخول';
-                toggleText.innerText = 'ليس لديك حساب؟';
-                toggleBtn.innerText = 'إنشاء حساب جديد';
+                alertBox.classList.add('alert-error');
+                alertBox.innerText = "خطأ: البريد الإلكتروني أو كلمة السر غير صحيحة!";
+                alertBox.style.display = 'block';
             }
         });
-
-        authForm.addEventListener('submit', async (e) => {
-            e.preventDefault();
-            const email = document.getElementById('email').value;
-            const password = document.getElementById('password').value;
-
-            showAlert('جاري المعالجة...', 'success');
-
-            try {
-                if (isSignUpMode) {
-                    const { data, error } = await _supabase.auth.signUp({ email, password });
-                    if (error) {
-                        showAlert('خطأ: ' + error.message, 'error');
-                    } else {
-                        showAlert('تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول.', 'success');
-                    }
-                } else {
-                    const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
-                    if (error) {
-                        showAlert('خطأ في البريد الإلكتروني أو كلمة السر', 'error');
-                    } else {
-                        showAlert('تم تسجيل الدخول بنجاح! جاري التوجيه...', 'success');
-                        setTimeout(() => {
-                            window.location.href = 'index.html';
-                        }, 1500);
-                    }
-                }
-            } catch (err) {
-                showAlert('حدث خطأ: ' + err.message, 'error');
-            }
-        });
-
-        function showAlert(msg, type) {
-            alertBox.innerText = msg;
-            alertBox.className = type;
-            alertBox.style.display = 'block';
-        }
     </script>
 </body>
 </html>
