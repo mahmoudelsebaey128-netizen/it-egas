@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html dir="rtl" lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>تسجيل الدخول - IT EGAS</title>
+    <!-- مكتبة Supabase الرسمية -->
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background-color: #f4f7f6;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+        }
+
+        .login-card {
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            width: 90%;
+            max-width: 380px;
+            text-align: center;
+        }
+
+        .login-card h2 {
+            margin-bottom: 20px;
+            color: #1e293b;
+        }
+
+        .form-group {
+            margin-bottom: 15px;
+            text-align: right;
+        }
+
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            color: #475569;
+            font-size: 14px;
+        }
+
+        .form-group input {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #cbd5e1;
+            border-radius: 6px;
+            outline: none;
+            font-size: 14px;
+        }
+
+        .form-group input:focus {
+            border-color: #2563eb;
+        }
+
+        .btn-submit {
+            width: 100%;
+            padding: 10px;
+            background-color: #2563eb;
+            color: white;
+            border: none;
+            border-radius: 6px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            background-color: #1d4ed8;
+        }
+
+        .toggle-mode {
+            margin-top: 15px;
+            font-size: 13px;
+            color: #64748b;
+        }
+
+        .toggle-mode a {
+            color: #2563eb;
+            text-decoration: none;
+            font-weight: bold;
+            cursor: pointer;
+        }
+
+        #alert-box {
+            padding: 10px;
+            border-radius: 6px;
+            margin-bottom: 15px;
+            display: none;
+            font-size: 13px;
+        }
+        .error { background-color: #fef2f2; color: #dc2626; border: 1px solid #fecaca; }
+        .success { background-color: #f0fdf4; color: #16a34a; border: 1px solid #bbf7d0; }
+    </style>
+</head>
+<body>
+
+    <div class="login-card">
+        <h2 id="form-title">تسجيل الدخول</h2>
+        
+        <div id="alert-box"></div>
+
+        <form id="authForm">
+            <div class="form-group">
+                <label for="email">البريد الإلكتروني</label>
+                <input type="email" id="email" required placeholder="example@mail.com">
+            </div>
+            
+            <div class="form-group">
+                <label for="password">كلمة السر</label>
+                <input type="password" id="password" required placeholder="••••••••">
+            </div>
+
+            <button type="submit" class="btn-submit" id="btn-text">دخول</button>
+        </form>
+
+        <div class="toggle-mode">
+            <span id="toggle-text">ليس لديك حساب؟</span> 
+            <a href="#" id="toggle-btn">إنشاء حساب جديد</a>
+        </div>
+    </div>
+
+    <script>
+        // مفاتيح مشروعك الخاصة في Supabase
+        const SUPABASE_URL = 'https://fkowcbpcwzlzedjecfwg.supabase.co'; 
+        const SUPABASE_ANON_KEY = 'Sb_publishable_99X8u8Pf6ntYBReh-1DdAg_ZI4I-Sbf'; 
+
+        // تهيئة اتصال الباك إند
+        const _supabase = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+        let isSignUpMode = false;
+
+        const authForm = document.getElementById('authForm');
+        const formTitle = document.getElementById('form-title');
+        const btnText = document.getElementById('btn-text');
+        const toggleText = document.getElementById('toggle-text');
+        const toggleBtn = document.getElementById('toggle-btn');
+        const alertBox = document.getElementById('alert-box');
+
+        // التبديل بين الدخول وإنشاء الحساب
+        toggleBtn.addEventListener('click', (e) => {
+            e.preventDefault();
+            isSignUpMode = !isSignUpMode;
+            if (isSignUpMode) {
+                formTitle.innerText = 'حساب جديد';
+                btnText.innerText = 'إنشاء حساب';
+                toggleText.innerText = 'لديك حساب بالفعل؟';
+                toggleBtn.innerText = 'تسجيل الدخول';
+            } else {
+                formTitle.innerText = 'تسجيل الدخول';
+                btnText.innerText = 'دخول';
+                toggleText.innerText = 'ليس لديك حساب؟';
+                toggleBtn.innerText = 'إنشاء حساب جديد';
+            }
+        });
+
+        // تنفيذ عملية الدخول / التسجيل
+        authForm.addEventListener('submit', async (e) => {
+            e.preventDefault();
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            showAlert('جاري المعالجة...', 'success');
+
+            if (isSignUpMode) {
+                // 1. إنشاء حساب جديد
+                const { data, error } = await _supabase.auth.signUp({ email, password });
+                if (error) {
+                    showAlert(error.message, 'error');
+                } else {
+                    showAlert('تم إنشاء الحساب بنجاح! يمكنك الآن تسجيل الدخول.', 'success');
+                }
+            } else {
+                // 2. تسجيل دخول
+                const { data, error } = await _supabase.auth.signInWithPassword({ email, password });
+                if (error) {
+                    showAlert('خطأ في البريد أو كلمة السر', 'error');
+                } else {
+                    showAlert('تم تسجيل الدخول بنجاح! جاري التوجيه...', 'success');
+                    setTimeout(() => {
+                        window.location.href = 'index.html'; // التوجيه لصفحتك الرئيسية
+                    }, 1500);
+                }
+            }
+        });
+
+        function showAlert(msg, type) {
+            alertBox.innerText = msg;
+            alertBox.className = type;
+            alertBox.style.display = 'block';
+        }
+    </script>
+</body>
+</html>
