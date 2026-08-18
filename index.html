@@ -1,617 +1,394 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl">
+<html lang="ar" dir="rtl" class="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GasTrack - تطبيق إدارة المشاريع</title>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/lucide@latest"></script>
-    <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.9.0/dist/confetti.browser.min.js"></script>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
-
-        :root {
-            --primary-color: #2563eb;
-            --dark-bg: #0f172a;
-            --card-bg: #1e293b;
-            --text-primary: #f1f5f9;
-            --text-secondary: #cbd5e1;
-        }
-
-        body {
-            font-family: 'Plus Jakarta Sans', system-ui, -apple-system, sans-serif;
-            background-color: var(--dark-bg);
-            color: var(--text-primary);
-            line-height: 1.6;
-        }
-
-        body.light-theme {
-            --dark-bg: #f8fafc;
-            --card-bg: #ffffff;
-            --text-primary: #1e293b;
-            --text-secondary: #64748b;
-        }
-
-        .container {
-            display: grid;
-            grid-template-columns: 250px 1fr;
-            min-height: 100vh;
-            gap: 1px;
-            background-color: #334155;
-        }
-
-        /* Sidebar */
-        .sidebar {
-            background-color: var(--card-bg);
-            padding: 20px;
-            border-right: 1px solid rgba(100, 116, 139, 0.3);
-            display: flex;
-            flex-direction: column;
-            gap: 30px;
-            overflow-y: auto;
-        }
-
-        .logo {
-            font-size: 20px;
-            font-weight: bold;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            color: var(--primary-color);
-        }
-
-        .nav-menu {
-            display: flex;
-            flex-direction: column;
-            gap: 8px;
-        }
-
-        .nav-tab {
-            padding: 12px 16px;
-            border-radius: 8px;
-            cursor: pointer;
-            font-size: 14px;
-            border: none;
-            background: none;
-            color: var(--text-secondary);
-            text-align: right;
-            transition: all 0.3s ease;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .nav-tab:hover {
-            background-color: rgba(37, 99, 235, 0.1);
-            color: var(--primary-color);
-        }
-
-        .nav-tab.active {
-            background-color: rgba(37, 99, 235, 0.2);
-            color: var(--primary-color);
-            border-left: 4px solid var(--primary-color);
-        }
-
-        /* Main Content */
-        .main-content {
-            padding: 30px;
-            overflow-y: auto;
-        }
-
-        .header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 30px;
-        }
-
-        .header h1 {
-            font-size: 28px;
-        }
-
-        .header-actions {
-            display: flex;
-            gap: 15px;
-        }
-
-        button {
-            padding: 10px 20px;
-            border-radius: 8px;
-            border: none;
-            cursor: pointer;
-            font-weight: 600;
-            transition: all 0.3s ease;
-        }
-
-        .btn-primary {
-            background-color: var(--primary-color);
-            color: white;
-        }
-
-        .btn-primary:hover {
-            background-color: #1d4ed8;
-            transform: translateY(-2px);
-        }
-
-        .btn-secondary {
-            background-color: var(--card-bg);
-            color: var(--text-primary);
-            border: 1px solid rgba(100, 116, 139, 0.3);
-        }
-
-        .btn-secondary:hover {
-            background-color: rgba(37, 99, 235, 0.1);
-        }
-
-        /* Stats Cards */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
-            gap: 20px;
-            margin-bottom: 30px;
-        }
-
-        .stat-card {
-            background-color: var(--card-bg);
-            padding: 20px;
-            border-radius: 12px;
-            border: 1px solid rgba(100, 116, 139, 0.3);
-            transition: all 0.3s ease;
-        }
-
-        .stat-card:hover {
-            border-color: var(--primary-color);
-            transform: translateY(-4px);
-            box-shadow: 0 12px 24px rgba(37, 99, 235, 0.15);
-        }
-
-        .stat-label {
-            color: var(--text-secondary);
-            font-size: 12px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-bottom: 8px;
-        }
-
-        .stat-value {
-            font-size: 32px;
-            font-weight: bold;
-            color: var(--primary-color);
-        }
-
-        /* Tab Content */
-        .tab-content {
-            display: none;
-        }
-
-        .tab-content.active {
-            display: block;
-            animation: fadeIn 0.3s ease-in-out;
-        }
-
-        @keyframes fadeIn {
-            from { opacity: 0; }
-            to { opacity: 1; }
-        }
-
-        /* Kanban Board */
-        .kanban-container {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-            gap: 20px;
-        }
-
-        .kanban-column {
-            background-color: var(--card-bg);
-            border-radius: 12px;
-            overflow: hidden;
-            display: flex;
-            flex-direction: column;
-            border: 1px solid rgba(100, 116, 139, 0.3);
-        }
-
-        .column-header {
-            padding: 15px;
-            background-color: rgba(37, 99, 235, 0.1);
-            border-bottom: 2px solid var(--primary-color);
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-        }
-
-        .column-header h3 {
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .column-count {
-            background-color: var(--primary-color);
-            color: white;
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-        }
-
-        .column-body {
-            padding: 15px;
-            flex: 1;
-            overflow-y: auto;
-            min-height: 400px;
-        }
-
-        .task-card {
-            background-color: rgba(51, 65, 85, 0.5);
-            padding: 12px;
-            border-radius: 8px;
-            margin-bottom: 12px;
-            border: 1px solid rgba(100, 116, 139, 0.3);
-            cursor: grab;
-            transition: all 0.3s ease;
-        }
-
-        .task-card:hover {
-            border-color: var(--primary-color);
-            transform: translateX(-4px);
-            box-shadow: 0 8px 16px rgba(37, 99, 235, 0.1);
-        }
-
-        .task-card.dragging {
-            opacity: 0.5;
-            transform: rotate(2deg);
-        }
-
-        .task-title {
-            font-weight: 600;
-            font-size: 14px;
-            margin-bottom: 8px;
-        }
-
-        .task-meta {
-            display: flex;
-            gap: 8px;
-            font-size: 11px;
-            color: var(--text-secondary);
-        }
-
-        /* Modal Styles */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background-color: rgba(0, 0, 0, 0.7);
-            z-index: 1000;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .modal.active {
-            display: flex;
-        }
-
-        .modal-content {
-            background-color: var(--card-bg);
-            padding: 30px;
-            border-radius: 12px;
-            max-width: 500px;
-            width: 90%;
-            max-height: 90vh;
-            overflow-y: auto;
-            box-shadow: 0 20px 60px rgba(0, 0, 0, 0.3);
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .modal-header h2 {
-            font-size: 20px;
-        }
-
-        .close-btn {
-            background: none;
-            border: none;
-            color: var(--text-primary);
-            font-size: 24px;
-            cursor: pointer;
-            padding: 0;
-            width: 30px;
-            height: 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            margin-bottom: 5px;
-            font-size: 14px;
-            font-weight: 600;
-        }
-
-        .form-group input,
-        .form-group select,
-        .form-group textarea {
-            width: 100%;
-            padding: 10px;
-            border: 1px solid rgba(100, 116, 139, 0.3);
-            border-radius: 8px;
-            background-color: rgba(51, 65, 85, 0.5);
-            color: var(--text-primary);
-            font-family: inherit;
-        }
-
-        .form-group textarea {
-            resize: vertical;
-            min-height: 80px;
-        }
-
-        /* Badge Styles */
-        .badge {
-            display: inline-block;
-            padding: 4px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: 600;
-        }
-
-        .badge-high { background-color: rgba(220, 38, 38, 0.2); color: #fca5a5; }
-        .badge-medium { background-color: rgba(217, 119, 6, 0.2); color: #fdba74; }
-        .badge-low { background-color: rgba(34, 197, 94, 0.2); color: #86efac; }
-
-        /* Responsive */
-        @media (max-width: 768px) {
-            .container {
-                grid-template-columns: 1fr;
-            }
-
-            .sidebar {
-                border-right: none;
-                border-bottom: 1px solid rgba(100, 116, 139, 0.3);
-                flex-direction: row;
-                overflow-x: auto;
-                gap: 10px;
-                padding: 10px;
-            }
-
-            .nav-menu {
-                flex-direction: row;
-                gap: 10px;
-            }
-
-            .kanban-container {
-                grid-template-columns: 1fr;
-            }
-
-            .stats-grid {
-                grid-template-columns: 1fr;
-            }
-        }
-
-        .space-y-4 > * + * {
-            margin-top: 16px;
-        }
-    </style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>GasTrack - IT Operations Dashboard</title>
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      darkMode: 'class',
+    }
+  </script>
+  
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  
+  <!-- Google Fonts (Cairo & Inter) -->
+  <link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;500;600;700;900&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
+  
+  <style>
+    body { 
+      font-family: 'Cairo', 'Inter', sans-serif; 
+    }
+    ::-webkit-scrollbar { 
+      width: 6px; 
+      height: 6px; 
+    }
+    ::-webkit-scrollbar-track { 
+      background: transparent; 
+    }
+    ::-webkit-scrollbar-thumb { 
+      background: #475569; 
+      border-radius: 4px; 
+    }
+  </style>
 </head>
-<body>
-    <div class="container">
-        <!-- Sidebar -->
-        <aside class="sidebar">
-            <div class="logo">
-                <span>📊</span>
-                GasTrack
-            </div>
-            <nav class="nav-menu">
-                <button class="nav-tab active" data-tab="dashboard">📈 لوحة التحكم</button>
-                <button class="nav-tab" data-tab="kanban">📋 لوحة كانبان</button>
-                <button class="nav-tab" data-tab="team">👥 الفريق</button>
-                <button class="nav-tab" data-tab="achievements">🏆 الإنجازات</button>
-            </nav>
-        </aside>
+<body class="bg-slate-100 text-slate-800 dark:bg-slate-900 dark:text-slate-100 min-h-screen flex flex-col transition-colors duration-300">
 
-        <!-- Main Content -->
-        <main class="main-content">
-            <div class="header">
-                <h1>GasTrack - مدير المشاريع</h1>
-                <div class="header-actions">
-                    <button class="btn-primary" id="openCreateTaskModalBtn">+ مهمة جديدة</button>
-                    <button class="btn-secondary" id="themeToggleBtn">🌙 وضع داكن</button>
-                </div>
-            </div>
-
-            <!-- Dashboard Tab -->
-            <div class="tab-content active" id="tab-dashboard">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-label">الكفاءة الإجمالية</div>
-                        <div class="stat-value" id="dashOverallEfficiency">0%</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">إجمالي المهام</div>
-                        <div class="stat-value" id="dashTotalTasks">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">المهام المكتملة</div>
-                        <div class="stat-value" id="dashCompletedTasks">0</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-label">قيد المراجعة</div>
-                        <div class="stat-value" id="dashInProgressTasks">0</div>
-                    </div>
-                </div>
-
-                <div class="stat-card">
-                    <div style="padding: 20px;">
-                        <h3 style="margin-bottom: 20px;">توزيع الفئات</h3>
-                        <div id="dashCategoryProgressContainer" class="space-y-4"></div>
-                    </div>
-                </div>
-
-                <div style="margin-top: 30px;">
-                    <div class="stat-card">
-                        <div style="padding: 20px;">
-                            <h3 style="margin-bottom: 20px;">أفضل الأداء</h3>
-                            <div id="dashLeaderboardContainer" class="space-y-4"></div>
-                        </div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Kanban Tab -->
-            <div class="tab-content" id="tab-kanban">
-                <div class="kanban-container">
-                    <div class="kanban-column">
-                        <div class="column-header">
-                            <h3>مهام جديدة</h3>
-                            <span class="column-count" id="count-todo">0</span>
-                        </div>
-                        <div class="column-body kanban-column-body" id="col-todo" data-status="To Do"></div>
-                    </div>
-                    <div class="kanban-column">
-                        <div class="column-header">
-                            <h3>قيد التنفيذ</h3>
-                            <span class="column-count" id="count-in-progress">0</span>
-                        </div>
-                        <div class="column-body kanban-column-body" id="col-in-progress" data-status="In Progress"></div>
-                    </div>
-                    <div class="kanban-column">
-                        <div class="column-header">
-                            <h3>قيد المراجعة</h3>
-                            <span class="column-count" id="count-in-review">0</span>
-                        </div>
-                        <div class="column-body kanban-column-body" id="col-in-review" data-status="In Review"></div>
-                    </div>
-                    <div class="kanban-column">
-                        <div class="column-header">
-                            <h3>مكتملة</h3>
-                            <span class="column-count" id="count-done">0</span>
-                        </div>
-                        <div class="column-body kanban-column-body" id="col-done" data-status="Done"></div>
-                    </div>
-                </div>
-            </div>
-
-            <!-- Team Tab -->
-            <div class="tab-content" id="tab-team">
-                <div class="stats-grid" id="teamCardsGrid"></div>
-            </div>
-
-            <!-- Achievements Tab -->
-            <div class="tab-content" id="tab-achievements">
-                <div id="achievementHistoryList" class="space-y-4"></div>
-            </div>
-        </main>
+  <!-- Header Navigation Bar -->
+  <header class="bg-white dark:bg-slate-800 border-b border-slate-200 dark:border-slate-700 px-6 py-3.5 flex flex-wrap justify-between items-center sticky top-0 z-30 shadow-sm">
+    <div class="flex items-center space-x-3 space-x-reverse">
+      <div class="bg-blue-600 p-2.5 rounded-xl text-white shadow-lg shadow-blue-500/30">
+        <i class="fa-solid fa-microchip fa-lg"></i>
+      </div>
+      <div>
+        <h1 class="text-xl font-bold tracking-wide text-slate-900 dark:text-white flex items-center gap-2">
+          GasTrack <span class="text-xs bg-blue-500/10 text-blue-600 dark:text-blue-400 border border-blue-500/20 px-2 py-0.5 rounded-full font-medium">IT Team Portal</span>
+        </h1>
+        <p class="text-xs text-slate-500 dark:text-slate-400">
+          <span>المدير المسؤول:</span> 
+          <span class="text-blue-600 dark:text-blue-400 font-bold" id="manager-name">ISLAM</span>
+        </p>
+      </div>
     </div>
 
-    <!-- Create Task Modal -->
-    <div class="modal" id="createTaskModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>مهمة جديدة</h2>
-                <button class="close-btn" id="closeCreateTaskModalBtn">&times;</button>
-            </div>
-            <form id="createTaskForm">
-                <div class="form-group">
-                    <label>عنوان المهمة *</label>
-                    <input type="text" id="taskTitleInput" required>
-                </div>
-                <div class="form-group">
-                    <label>الوصف</label>
-                    <textarea id="taskDescInput"></textarea>
-                </div>
-                <div class="form-group">
-                    <label>الفئة *</label>
-                    <select id="taskCategorySelect" required>
-                        <option>Cyber Security</option>
-                        <option>AI</option>
-                        <option>Training Communication</option>
-                        <option>Software</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>المسؤول *</label>
-                    <select id="taskAssigneeSelect" required></select>
-                </div>
-                <div class="form-group">
-                    <label>الأولوية</label>
-                    <select id="taskPrioritySelect">
-                        <option>Low</option>
-                        <option>Medium</option>
-                        <option>High</option>
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label>تاريخ الاستحقاق *</label>
-                    <input type="date" id="taskDueDateInput" required>
-                </div>
-                <div class="form-group">
-                    <label>وزن الجودة (1-10)</label>
-                    <input type="number" id="taskWeightInput" min="1" max="10" value="5">
-                </div>
-                <button type="submit" class="btn-primary" style="width: 100%;">إنشاء المهمة</button>
-            </form>
+    <!-- Controls: Language & Theme Switches -->
+    <div class="flex items-center gap-3">
+      <!-- Dark / Light Mode Button -->
+      <button onclick="toggleTheme()" class="bg-slate-200 dark:bg-slate-700 hover:bg-slate-300 dark:hover:bg-slate-600 text-slate-700 dark:text-slate-200 p-2.5 rounded-lg transition text-sm flex items-center gap-2">
+        <i id="theme-icon" class="fa-solid fa-moon"></i>
+        <span id="theme-text" class="hidden sm:inline">Dark</span>
+      </button>
+
+      <!-- Logout Button -->
+      <button onclick="logout()" class="bg-red-600 hover:bg-red-500 text-white font-semibold text-xs sm:text-sm px-4 py-2.5 rounded-lg flex items-center gap-2 transition shadow-md">
+        <i class="fa-solid fa-sign-out-alt"></i>
+        <span>تسجيل الخروج</span>
+      </button>
+    </div>
+  </header>
+
+  <div class="flex flex-1">
+    <!-- Sidebar Navigation -->
+    <aside class="w-64 bg-white dark:bg-slate-800/50 border-l border-r border-slate-200 dark:border-slate-800 p-4 flex flex-col justify-between overflow-y-auto">
+      <div class="space-y-6">
+        <div>
+          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-2">القوائم الرئيسية</p>
+          <nav class="space-y-1.5">
+            <button onclick="switchTab('team')" id="nav-team" class="w-full text-right px-3.5 py-2.5 rounded-lg flex items-center gap-3 text-sm font-semibold transition bg-blue-600 text-white">
+              <i class="fa-solid fa-users w-5 text-center"></i> <span>فريق العمل والنشاط</span>
+            </button>
+            <button onclick="switchTab('periods')" id="nav-periods" class="w-full text-right px-3.5 py-2.5 rounded-lg flex items-center gap-3 text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 transition text-slate-600 dark:text-slate-300">
+              <i class="fa-solid fa-calendar-check w-5 text-center"></i> <span>متابعة التسليم الدورية</span>
+            </button>
+            <button onclick="switchTab('achievements')" id="nav-achievements" class="w-full text-right px-3.5 py-2.5 rounded-lg flex items-center gap-3 text-sm font-semibold hover:bg-slate-100 dark:hover:bg-slate-800 transition text-slate-600 dark:text-slate-300">
+              <i class="fa-solid fa-trophy w-5 text-center"></i> <span>إنجازات وتقييم الموظفين</span>
+            </button>
+          </nav>
         </div>
-    </div>
 
-    <!-- Rating Modal -->
-    <div class="modal" id="ratingModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h2>تقييم الجودة</h2>
-                <button class="close-btn" id="closeRatingModalBtn">&times;</button>
-            </div>
-            <form id="ratingForm">
-                <div style="padding: 15px; background-color: rgba(37, 99, 235, 0.1); border-radius: 8px; margin-bottom: 20px;">
-                    <p style="margin-bottom: 8px;"><strong>المهمة:</strong> <span id="ratingTaskTitle"></span></p>
-                    <p style="margin-bottom: 8px;"><strong>المسؤول:</strong> <span id="ratingAssignee"></span></p>
-                    <p><strong>وزن الجودة المتوقع:</strong> <span id="ratingWeight"></span></p>
-                </div>
-                <div class="form-group">
-                    <label>تقييم الجودة (1-10) *</label>
-                    <input type="number" id="qualityRatingInput" min="1" max="10" value="10" required>
-                </div>
-                <button type="submit" class="btn-primary" style="width: 100%;">حفظ التقييم</button>
-            </form>
+        <div>
+          <p class="text-xs font-bold text-slate-400 uppercase tracking-wider mb-3 px-2">تخصصات المهام</p>
+          <div class="space-y-2 px-2 text-xs font-medium">
+            <div class="flex items-center gap-2 text-purple-600 dark:text-purple-400"><span class="w-2.5 h-2.5 rounded-full bg-purple-500"></span> AI</div>
+            <div class="flex items-center gap-2 text-blue-600 dark:text-blue-400"><span class="w-2.5 h-2.5 rounded-full bg-blue-500"></span> COMMUNICATION</div>
+            <div class="flex items-center gap-2 text-emerald-600 dark:text-emerald-400"><span class="w-2.5 h-2.5 rounded-full bg-emerald-500"></span> HR</div>
+            <div class="flex items-center gap-2 text-amber-600 dark:text-amber-400"><span class="w-2.5 h-2.5 rounded-full bg-amber-500"></span> TRAINING</div>
+            <div class="flex items-center gap-2 text-red-600 dark:text-red-400"><span class="w-2.5 h-2.5 rounded-full bg-red-500"></span> CYBER SECURITY</div>
+          </div>
         </div>
-    </div>
+      </div>
 
-    <!-- Data Configuration -->
-    <script>
-        const CATEGORIES = {
-            'Cyber Security': { color: '#ef4444', badgeBg: 'badge-high' },
-            'AI': { color: '#a855f7', badgeBg: 'badge-review' },
-            'Training Communication': { color: '#f59e0b', badgeBg: 'badge-medium' },
-            'Software': { color: '#3b82f6', badgeBg: 'badge-progress' }
-        };
+      <div class="bg-slate-100 dark:bg-slate-800/80 p-3 rounded-xl border border-slate-200 dark:border-slate-700 text-xs text-slate-500 dark:text-slate-400 space-y-1">
+        <div class="flex justify-between"><span>المدير:</span> <span class="text-slate-800 dark:text-slate-200 font-bold">ISLAM</span></div>
+        <div class="flex justify-between"><span>أعضاء الفريق:</span> <span class="text-slate-800 dark:text-slate-200 font-bold">8 IT Engineers</span></div>
+      </div>
+    </aside>
 
-        const INITIAL_TEAM = [
-            { name: 'أحمد محمد', role: 'مهندس', email: 'ahmed@egas.com', avatar: 'https://i.pravatar.cc/150?img=1' },
-            { name: 'فاطمة علي', role: 'محلل', email: 'fatima@egas.com', avatar: 'https://i.pravatar.cc/150?img=2' },
-            { name: 'محمود حسن', role: 'مطور', email: 'mahmoud@egas.com', avatar: 'https://i.pravatar.cc/150?img=3' }
-        ];
+    <!-- Main Workspace -->
+    <main class="flex-1 p-6 overflow-y-auto">
 
-        const INITIAL_TASKS = [
-            { id: 'GT-101', title: 'تطوير نظام الأمان', description: 'تحسين بروتوكولات الأمان', category: 'Cyber Security', assignee: 'أحمد محمد', priority: 'High', status: 'In Progress', dueDate: '2026-12-31', qualityWeight: 9, rating: null },
-            { id: 'GT-102', title: 'بناء نموذج الذكاء الاصطناعي', description: 'تطوير نموذج تعلم الآلة', category: 'AI', assignee: 'فاطمة علي', priority: 'High', status: 'To Do', dueDate: '2026-12-25', qualityWeight: 8, rating: null }
-        ];
+      <!-- View 1: Team & Availability Dashboard -->
+      <section id="view-team" class="space-y-6">
+        <div class="flex justify-between items-center">
+          <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+            <i class="fa-solid fa-user-clock text-blue-500"></i> حالة تواجد الفريق والمهام الحالية
+          </h2>
+        </div>
 
-        const INITIAL_ACHIEVEMENTS = [];
-    </script>
+        <!-- Team Members Grid -->
+        <div id="team-cards-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+          <!-- سيتم ملؤها من JavaScript -->
+        </div>
+      </section>
 
-    <!-- Application Logic -->
-    <script src="app.js"></script>
+      <!-- View 2: Periods & Deliverables -->
+      <section id="view-periods" class="space-y-6 hidden">
+        <div class="flex justify-between items-center">
+          <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+            <i class="fa-solid fa-calendar-check text-emerald-500"></i> متابعة التسليم الدورية
+          </h2>
+        </div>
+        
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 overflow-hidden shadow-sm">
+          <table class="w-full text-sm">
+            <thead class="bg-slate-100 dark:bg-slate-700/50 border-b border-slate-200 dark:border-slate-700">
+              <tr>
+                <th class="text-right px-4 py-3 font-semibold text-slate-700 dark:text-slate-300">اسم المهمة</th>
+                <th class="text-right px-4 py-3 font-semibold text-slate-700 dark:text-slate-300">المتخصص</th>
+                <th class="text-right px-4 py-3 font-semibold text-slate-700 dark:text-slate-300">التخصص</th>
+                <th class="text-right px-4 py-3 font-semibold text-slate-700 dark:text-slate-300">الحالة</th>
+                <th class="text-right px-4 py-3 font-semibold text-slate-700 dark:text-slate-300">تاريخ التسليم</th>
+              </tr>
+            </thead>
+            <tbody id="periods-table-body" class="divide-y divide-slate-200 dark:divide-slate-700">
+              <!-- سيتم ملؤها من JavaScript -->
+            </tbody>
+          </table>
+        </div>
+      </section>
+
+      <!-- View 3: Achievements & Ratings -->
+      <section id="view-achievements" class="space-y-6 hidden">
+        <div class="flex justify-between items-center">
+          <h2 class="text-lg font-bold text-slate-800 dark:text-slate-100 flex items-center gap-2">
+            <i class="fa-solid fa-trophy text-amber-500"></i> إنجازات وتقييم الموظفين
+          </h2>
+        </div>
+
+        <div class="bg-white dark:bg-slate-800 rounded-xl border border-slate-200 dark:border-slate-700 p-6 shadow-sm">
+          <div id="achievements-list" class="space-y-4">
+            <!-- سيتم ملؤها من JavaScript -->
+          </div>
+        </div>
+      </section>
+
+    </main>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script>
+    // Supabase Configuration
+    const SUPABASE_URL = 'https://fkowcbpcwzlzedjecfwg.supabase.co';
+    const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImZrb3djYnBjd3psemVkamVjZndnIiwicm9sZSI6ImFub24iLCJpYXQiOjE3ODcwNTg4NzUsImV4cCI6MjEwMjYzNDg3NX0.E1z5O5N3q-5V5O5N3q-5V5O5N3q-5V5O5N3q5';
+
+    const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+
+    // Check authentication on page load
+    window.addEventListener('DOMContentLoaded', async () => {
+      const user = await checkUser();
+      if (!user) {
+        window.location.href = 'login.html';
+      } else {
+        loadDashboardData();
+      }
+    });
+
+    // Check if user is logged in
+    async function checkUser() {
+      const authToken = localStorage.getItem('auth_token');
+      return authToken ? JSON.parse(authToken) : null;
+    }
+
+    // Load all dashboard data
+    async function loadDashboardData() {
+      await loadTeamData();
+      await loadPeriodsData();
+      await loadAchievementsData();
+    }
+
+    // Load team data from Supabase
+    async function loadTeamData() {
+      try {
+        const { data, error } = await supabase
+          .from('team_members')
+          .select('*')
+          .order('name');
+
+        if (error) throw error;
+
+        const container = document.getElementById('team-cards-container');
+        container.innerHTML = '';
+
+        data.forEach(member => {
+          const card = document.createElement('div');
+          card.className = 'bg-white dark:bg-slate-800 p-4 rounded-xl border border-slate-200 dark:border-slate-700 shadow-sm space-y-3';
+          card.innerHTML = `
+            <div class="flex justify-between items-start">
+              <div>
+                <h3 class="font-bold text-slate-900 dark:text-slate-100 text-sm">${member.name}</h3>
+                <span class="text-[10px] font-bold px-2 py-0.5 rounded border bg-${getCategoryColor(member.specialty)}-500/10 text-${getCategoryColor(member.specialty)}-600 dark:text-${getCategoryColor(member.specialty)}-400 border-${getCategoryColor(member.specialty)}-500/20">${member.specialty}</span>
+              </div>
+              <span class="bg-${getStatusColor(member.status)}-500/10 text-${getStatusColor(member.status)}-600 dark:text-${getStatusColor(member.status)}-400 border border-${getStatusColor(member.status)}-500/20 px-2 py-0.5 rounded-full text-[10px] font-bold">
+                <i class="fa-solid fa-circle text-[8px] mr-1"></i> ${member.status}
+              </span>
+            </div>
+
+            <div class="space-y-1.5 text-xs text-slate-600 dark:text-slate-300 border-t border-slate-100 dark:border-slate-700/60 pt-2">
+              <p class="flex justify-between">
+                <span class="text-slate-400">أوقات التواجد:</span>
+                <span class="font-semibold text-slate-700 dark:text-slate-200">${member.availability}</span>
+              </p>
+              <p class="flex justify-between">
+                <span class="text-slate-400">المهمة المطلوبة:</span>
+                <span class="font-semibold text-blue-600 dark:text-blue-400">${member.current_task}</span>
+              </p>
+            </div>
+          `;
+          container.appendChild(card);
+        });
+      } catch (error) {
+        console.error('Error loading team data:', error);
+      }
+    }
+
+    // Load periods data
+    async function loadPeriodsData() {
+      try {
+        const { data, error } = await supabase
+          .from('deliverables')
+          .select('*')
+          .order('due_date');
+
+        if (error) throw error;
+
+        const tbody = document.getElementById('periods-table-body');
+        tbody.innerHTML = '';
+
+        data.forEach(task => {
+          const row = document.createElement('tr');
+          row.className = 'hover:bg-slate-50 dark:hover:bg-slate-800/50 transition';
+          row.innerHTML = `
+            <td class="px-4 py-3 text-slate-900 dark:text-slate-100 font-medium">${task.task_name}</td>
+            <td class="px-4 py-3 text-slate-600 dark:text-slate-300">${task.specialist_name}</td>
+            <td class="px-4 py-3">
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded border bg-${getCategoryColor(task.specialty)}-500/10 text-${getCategoryColor(task.specialty)}-600 dark:text-${getCategoryColor(task.specialty)}-400">${task.specialty}</span>
+            </td>
+            <td class="px-4 py-3">
+              <span class="text-[10px] font-bold px-2 py-0.5 rounded border bg-${getStatusColor(task.status)}-500/10 text-${getStatusColor(task.status)}-600 dark:text-${getStatusColor(task.status)}-400">${task.status}</span>
+            </td>
+            <td class="px-4 py-3 text-slate-600 dark:text-slate-300">${new Date(task.due_date).toLocaleDateString('ar-EG')}</td>
+          `;
+          tbody.appendChild(row);
+        });
+      } catch (error) {
+        console.error('Error loading periods data:', error);
+      }
+    }
+
+    // Load achievements
+    async function loadAchievementsData() {
+      try {
+        const { data, error } = await supabase
+          .from('achievements')
+          .select('*')
+          .order('achievement_date', { ascending: false });
+
+        if (error) throw error;
+
+        const list = document.getElementById('achievements-list');
+        list.innerHTML = '';
+
+        data.forEach(achievement => {
+          const item = document.createElement('div');
+          item.className = 'flex items-start gap-4 p-4 bg-slate-50 dark:bg-slate-800/50 rounded-lg border border-slate-200 dark:border-slate-700';
+          item.innerHTML = `
+            <div class="flex-shrink-0 w-12 h-12 bg-${achievement.rating >= 4 ? 'emerald' : 'amber'}-500/20 rounded-lg flex items-center justify-center">
+              <i class="fa-solid fa-trophy text-${achievement.rating >= 4 ? 'emerald' : 'amber'}-500 text-lg"></i>
+            </div>
+            <div class="flex-1">
+              <h4 class="font-semibold text-slate-900 dark:text-slate-100">${achievement.employee_name}</h4>
+              <p class="text-sm text-slate-600 dark:text-slate-300 mt-1">${achievement.task_title}</p>
+              <div class="flex items-center gap-2 mt-2">
+                <span class="text-xs font-bold px-2 py-0.5 rounded bg-blue-500/10 text-blue-600 dark:text-blue-400">التقييم: ${achievement.rating}/5</span>
+                <span class="text-xs text-slate-500">${new Date(achievement.achievement_date).toLocaleDateString('ar-EG')}</span>
+              </div>
+            </div>
+          `;
+          list.appendChild(item);
+        });
+      } catch (error) {
+        console.error('Error loading achievements:', error);
+      }
+    }
+
+    // Helper functions
+    function getCategoryColor(category) {
+      const colors = {
+        'AI': 'purple',
+        'COMMUNICATION': 'blue',
+        'HR': 'emerald',
+        'TRAINING': 'amber',
+        'CYBER SECURITY': 'red'
+      };
+      return colors[category] || 'slate';
+    }
+
+    function getStatusColor(status) {
+      const colors = {
+        'Online': 'emerald',
+        'In Task': 'amber',
+        'Offline': 'slate',
+        'Completed': 'emerald',
+        'In Progress': 'blue',
+        'Pending': 'slate'
+      };
+      return colors[status] || 'slate';
+    }
+
+    // Tab switching
+    function switchTab(tabName) {
+      const views = ['view-team', 'view-periods', 'view-achievements'];
+      const navs = ['nav-team', 'nav-periods', 'nav-achievements'];
+
+      views.forEach(view => {
+        document.getElementById(view).classList.add('hidden');
+      });
+
+      navs.forEach(nav => {
+        document.getElementById(nav).classList.remove('bg-blue-600', 'text-white');
+        document.getElementById(nav).classList.add('hover:bg-slate-100', 'dark:hover:bg-slate-800', 'text-slate-600', 'dark:text-slate-300');
+      });
+
+      document.getElementById('view-' + tabName).classList.remove('hidden');
+      document.getElementById('nav-' + tabName).classList.add('bg-blue-600', 'text-white');
+      document.getElementById('nav-' + tabName).classList.remove('hover:bg-slate-100', 'dark:hover:bg-slate-800', 'text-slate-600', 'dark:text-slate-300');
+    }
+
+    // Theme toggle
+    function toggleTheme() {
+      const html = document.documentElement;
+      if (html.classList.contains('dark')) {
+        html.classList.remove('dark');
+        localStorage.setItem('theme', 'light');
+        document.getElementById('theme-icon').className = 'fa-solid fa-sun';
+        document.getElementById('theme-text').textContent = 'Light';
+      } else {
+        html.classList.add('dark');
+        localStorage.setItem('theme', 'dark');
+        document.getElementById('theme-icon').className = 'fa-solid fa-moon';
+        document.getElementById('theme-text').textContent = 'Dark';
+      }
+    }
+
+    // Load saved theme on page load
+    window.addEventListener('DOMContentLoaded', () => {
+      const theme = localStorage.getItem('theme') || 'dark';
+      if (theme === 'light') {
+        document.documentElement.classList.remove('dark');
+        document.getElementById('theme-icon').className = 'fa-solid fa-sun';
+        document.getElementById('theme-text').textContent = 'Light';
+      }
+    });
+
+    // Logout function
+    function logout() {
+      localStorage.removeItem('auth_token');
+      window.location.href = 'login.html';
+    }
+  </script>
 </body>
 </html>
