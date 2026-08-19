@@ -1,17 +1,12 @@
-// التحقق من الجلسة أولاً
-if (localStorage.getItem('isLoggedIn') !== 'true') {
-    window.location.href = 'login.html';
-}
-
 const translations = {
     ar: {
-        subHeader: "الشركة القابضة للغازات",
-        navBoard: "لوحة المهام (Board)",
-        navReports: "التقارير والانجازات",
+        subHeader: "شركة إيجاس - IT",
+        navBoard: "Dashboard",
+        navReports: "التقارير والإحصائيات",
         navCategories: "إدارة التصنيفات",
-        navTeam: "إدارة أعضاء الفريق",
-        leaderRole: "Team Leader & Admin",
-        titleBoard: "لوحة التحكم المباشرة ( Board)",
+        navTeam: "إدارة الفريق",
+        leaderRole: "قائد الفريق (Admin)",
+        titleBoard: "Dashboard",
         titleReports: "تقارير الأداء ومتابعة تسليمات الموظفين",
         titleCategories: "إدارة وتعديل التصنيفات (Categories)",
         titleTeam: "إدارة أعضاء فريق تكنولوجيا المعلومات",
@@ -48,12 +43,12 @@ const translations = {
     },
     en: {
         subHeader: "EGAS Holding Company",
-        navBoard: "Jira Board",
+        navBoard: "Dashboard",
         navReports: "Reports & Analytics",
         navCategories: "Manage Categories",
         navTeam: "Team Management",
         leaderRole: "Team Leader & Admin",
-        titleBoard: "Live Task Board (Jira Board)",
+        titleBoard: "Dashboard",
         titleReports: "Employee Performance & Delivery Reports",
         titleCategories: "Manage Category Domains",
         titleTeam: "IT Team Members Management",
@@ -113,6 +108,12 @@ let statusChartObj = null;
 let memberChartObj = null;
 
 document.addEventListener('DOMContentLoaded', () => {
+    const currentUser = localStorage.getItem('currentUser');
+    if (currentUser) {
+        document.getElementById('user-display-name').innerText = currentUser;
+        document.getElementById('user-avatar').innerText = currentUser.substring(0, 2).toUpperCase();
+    }
+
     applyTheme(state.theme);
     applyLanguage(state.lang);
     renderAll();
@@ -421,7 +422,9 @@ function applyLanguage(lang) {
 function openModal(id) { document.getElementById(id).style.display = 'flex'; }
 function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
+// تسجيل الخروج المباشر
 function logout() {
     localStorage.removeItem('isLoggedIn');
-    window.location.href = 'login.html';
+    localStorage.removeItem('currentUser');
+    window.location.href = './login.html';
 }
