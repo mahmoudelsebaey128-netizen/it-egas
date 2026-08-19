@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Jira Board - EGAS IT Department</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <style>
         :root {
             --bg-primary: #f4f5f7;
@@ -18,7 +19,7 @@
             --sidebar-bg: #0747a6;
             --sidebar-text: #deebff;
             --card-shadow: 0 1px 3px rgba(0,0,0,0.12);
-            --column-bg: #f4f5f7;
+            --column-bg: #ebecf0;
         }
 
         [data-theme="dark"] {
@@ -36,335 +37,96 @@
             --column-bg: #1e293b;
         }
 
-        * {
-            box-sizing: border-box;
-            margin: 0;
-            padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
-            transition: background-color 0.2s, color 0.2s;
-        }
+        * { box-sizing: border-box; margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; transition: background-color 0.2s, color 0.2s; }
+        body { background-color: var(--bg-primary); color: var(--text-main); display: flex; height: 100vh; overflow: hidden; }
 
-        body {
-            background-color: var(--bg-primary);
-            color: var(--text-main);
-            display: flex;
-            height: 100vh;
-            overflow: hidden;
-        }
-
-        /* Side Navigation */
-        .sidebar {
-            width: 240px;
-            background-color: var(--sidebar-bg);
-            color: var(--sidebar-text);
-            display: flex;
-            flex-direction: column;
-            padding: 20px 15px;
-            box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-        }
-
-        .brand-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 30px;
-            padding-bottom: 15px;
-            border-bottom: 1px solid rgba(255,255,255,0.2);
-        }
-
+        .sidebar { width: 260px; background-color: var(--sidebar-bg); color: var(--sidebar-text); display: flex; flex-direction: column; padding: 20px 15px; box-shadow: 2px 0 5px rgba(0,0,0,0.1); }
+        .brand-header { display: flex; align-items: center; gap: 12px; margin-bottom: 30px; padding-bottom: 15px; border-bottom: 1px solid rgba(255,255,255,0.2); }
         .brand-header i { font-size: 24px; color: #38bdf8; }
         .brand-header h1 { font-size: 18px; font-weight: bold; }
         .brand-header span { font-size: 11px; opacity: 0.8; display: block; }
 
         .nav-links { list-style: none; display: flex; flex-direction: column; gap: 8px; flex-grow: 1; }
-        .nav-item a {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            padding: 10px 14px;
-            color: var(--sidebar-text);
-            text-decoration: none;
-            border-radius: 6px;
-            font-size: 14px;
-            font-weight: 500;
-        }
-        .nav-item.active a, .nav-item a:hover {
-            background-color: rgba(255, 255, 255, 0.15);
-            color: #ffffff;
-        }
+        .nav-item a { display: flex; align-items: center; gap: 12px; padding: 10px 14px; color: var(--sidebar-text); text-decoration: none; border-radius: 6px; font-size: 14px; font-weight: 500; }
+        .nav-item.active a, .nav-item a:hover { background-color: rgba(255, 255, 255, 0.15); color: #ffffff; }
 
-        .user-profile {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            padding-top: 15px;
-            border-top: 1px solid rgba(255,255,255,0.2);
-        }
+        .user-profile { display: flex; align-items: center; gap: 10px; padding-top: 15px; border-top: 1px solid rgba(255,255,255,0.2); }
+        .avatar-leader { width: 38px; height: 38px; border-radius: 50%; background: #e0f2fe; color: #0369a1; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 14px; }
 
-        .avatar-leader {
-            width: 38px;
-            height: 38px;
-            border-radius: 50%;
-            background: #e0f2fe;
-            color: #0369a1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-            font-size: 14px;
-        }
-
-        /* Main Content */
-        .main-content {
-            flex-grow: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .top-navbar {
-            height: 60px;
-            background-color: var(--bg-secondary);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 25px;
-        }
-
+        .main-content { flex-grow: 1; display: flex; flex-direction: column; overflow: hidden; }
+        .top-navbar { height: 60px; background-color: var(--bg-secondary); border-bottom: 1px solid var(--border-color); display: flex; align-items: center; justify-content: space-between; padding: 0 25px; }
         .top-actions { display: flex; align-items: center; gap: 15px; }
 
-        .btn-action {
-            background-color: var(--primary-blue);
-            color: white;
-            border: none;
-            padding: 8px 16px;
-            border-radius: 6px;
-            font-weight: 600;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 13px;
-        }
+        .btn-action { background-color: var(--primary-blue); color: white; border: none; padding: 8px 16px; border-radius: 6px; font-weight: 600; cursor: pointer; display: flex; align-items: center; gap: 8px; font-size: 13px; }
         .btn-action:hover { background-color: var(--primary-hover); }
 
-        .icon-btn {
-            background: none;
-            border: none;
-            color: var(--text-main);
-            font-size: 18px;
-            cursor: pointer;
-            position: relative;
-            padding: 6px;
-            border-radius: 50%;
-        }
+        .icon-btn { background: none; border: none; color: var(--text-main); font-size: 18px; cursor: pointer; position: relative; padding: 6px; border-radius: 50%; }
+        .notification-badge { position: absolute; top: 2px; right: 2px; background: #ef4444; color: white; font-size: 10px; width: 16px; height: 16px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: bold; }
 
-        .notification-badge {
-            position: absolute;
-            top: 2px;
-            right: 2px;
-            background: #ef4444;
-            color: white;
-            font-size: 10px;
-            width: 16px;
-            height: 16px;
-            border-radius: 50%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-weight: bold;
-        }
-
-        .content-area {
-            flex-grow: 1;
-            padding: 20px 25px;
-            overflow-y: auto;
-        }
-
-        /* Tabs Content */
+        .content-area { flex-grow: 1; padding: 20px 25px; overflow-y: auto; }
         .tab-panel { display: none; }
         .tab-panel.active { display: block; }
 
-        /* Jira Kanban Board */
-        .kanban-board {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 15px;
-            height: calc(100vh - 150px);
-        }
+        .kanban-board { display: grid; grid-template-columns: repeat(4, 1fr); gap: 15px; height: calc(100vh - 150px); }
+        .kanban-col { background-color: var(--column-bg); border-radius: 8px; padding: 12px; display: flex; flex-direction: column; border: 1px solid var(--border-color); }
+        .col-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; font-weight: bold; font-size: 14px; color: var(--text-sub); padding-bottom: 8px; border-bottom: 2px solid var(--border-color); }
 
-        .kanban-col {
-            background-color: var(--column-bg);
-            border-radius: 8px;
-            padding: 12px;
-            display: flex;
-            flex-direction: column;
-            border: 1px solid var(--border-color);
-        }
-
-        .col-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-            font-weight: bold;
-            font-size: 14px;
-            color: var(--text-sub);
-            padding-bottom: 8px;
-            border-bottom: 2px solid var(--border-color);
-        }
-
-        .cards-container {
-            flex-grow: 1;
-            overflow-y: auto;
-            display: flex;
-            flex-direction: column;
-            gap: 10px;
-            min-height: 100px;
-        }
-
-        .task-card {
-            background-color: var(--bg-card);
-            border-radius: 6px;
-            padding: 12px;
-            box-shadow: var(--card-shadow);
-            border: 1px solid var(--border-color);
-            cursor: grab;
-        }
-
-        .task-tag {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 4px;
-            font-size: 11px;
-            font-weight: bold;
-            margin-bottom: 8px;
-            color: white;
-        }
-        .tag-ai { background-color: #8b5cf6; }
-        .tag-training { background-color: #10b981; }
-        .tag-communication { background-color: #f59e0b; }
-        .tag-cyber { background-color: #ef4444; }
-
+        .cards-container { flex-grow: 1; overflow-y: auto; display: flex; flex-direction: column; gap: 10px; min-height: 100px; }
+        .task-card { background-color: var(--bg-card); border-radius: 6px; padding: 12px; box-shadow: var(--card-shadow); border: 1px solid var(--border-color); cursor: grab; }
+        .task-tag { display: inline-block; padding: 2px 8px; border-radius: 4px; font-size: 11px; font-weight: bold; margin-bottom: 8px; color: white; background-color: #2563eb; }
         .task-title { font-size: 14px; font-weight: 600; margin-bottom: 6px; }
-        .task-footer {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-top: 10px;
-            font-size: 12px;
-            color: var(--text-sub);
-        }
 
-        .assignee-avatar {
-            width: 24px;
-            height: 24px;
-            border-radius: 50%;
-            background: #0284c7;
-            color: white;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 10px;
-            font-weight: bold;
-        }
+        .status-select { width: 100%; margin-top: 8px; padding: 4px 6px; border-radius: 4px; border: 1px solid var(--border-color); background: var(--bg-secondary); color: var(--text-main); font-size: 12px; }
 
-        /* Analytics & Reports */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
-            gap: 15px;
-            margin-bottom: 25px;
-        }
+        .charts-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(320px, 1fr)); gap: 20px; margin-bottom: 25px; }
+        .chart-card { background: var(--bg-card); border: 1px solid var(--border-color); border-radius: 8px; padding: 15px; }
 
-        .stat-card {
-            background: var(--bg-card);
-            border: 1px solid var(--border-color);
-            padding: 20px;
-            border-radius: 10px;
-            text-align: center;
-        }
-        .stat-card h3 { font-size: 28px; color: var(--primary-blue); margin-bottom: 5px; }
-        .stat-card p { font-size: 13px; color: var(--text-sub); }
+        .stats-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; margin-bottom: 25px; }
+        .stat-card { background: var(--bg-card); border: 1px solid var(--border-color); padding: 18px; border-radius: 8px; text-align: center; }
+        .stat-card h3 { font-size: 26px; color: var(--primary-blue); margin-bottom: 5px; }
 
-        .report-table {
-            width: 100%;
-            border-collapse: collapse;
-            background: var(--bg-card);
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid var(--border-color);
-        }
-        .report-table th, .report-table td {
-            padding: 12px 15px;
-            text-align: right;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 14px;
-        }
+        .report-table { width: 100%; border-collapse: collapse; background: var(--bg-card); border-radius: 8px; overflow: hidden; border: 1px solid var(--border-color); }
+        .report-table th, .report-table td { padding: 12px 15px; text-align: inherit; border-bottom: 1px solid var(--border-color); font-size: 14px; }
         .report-table th { background-color: var(--column-bg); font-weight: bold; }
 
-        /* Modals */
-        .modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
-            justify-content: center; align-items: center;
-            z-index: 1000;
-        }
-        .modal-content {
-            background: var(--bg-card);
-            padding: 25px;
-            border-radius: 12px;
-            width: 90%;
-            max-width: 480px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.2);
-        }
+        .modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.5); justify-content: center; align-items: center; z-index: 1000; }
+        .modal-content { background: var(--bg-card); padding: 25px; border-radius: 12px; width: 90%; max-width: 480px; box-shadow: 0 10px 25px rgba(0,0,0,0.2); }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .modal-header h3 { font-size: 16px; }
         .close-btn { cursor: pointer; font-size: 18px; border: none; background: none; color: var(--text-main); }
-        .form-group { margin-bottom: 15px; text-align: right; }
+        .form-group { margin-bottom: 15px; }
         .form-group label { display: block; font-size: 12px; margin-bottom: 5px; font-weight: bold; }
-        .form-group input, .form-group select, .form-group textarea {
-            width: 100%; padding: 10px; border: 1px solid var(--border-color);
-            border-radius: 6px; background: var(--bg-secondary); color: var(--text-main);
-        }
+        .form-group input, .form-group select { width: 100%; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; background: var(--bg-secondary); color: var(--text-main); }
 
-        .category-list, .team-list {
-            list-style: none; display: flex; flex-direction: column; gap: 8px; margin-top: 15px;
-        }
-        .item-row {
-            display: flex; justify-content: space-between; align-items: center;
-            padding: 8px 12px; background: var(--column-bg); border-radius: 6px;
-        }
+        .item-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 12px; background: var(--column-bg); border-radius: 6px; margin-bottom: 8px; }
         .btn-delete { color: #ef4444; border: none; background: none; cursor: pointer; }
+
+        .notif-item { padding: 10px; border: 1px solid var(--border-color); border-radius: 6px; cursor: pointer; transition: 0.2s; }
+        .notif-item:hover { background: var(--column-bg); }
     </style>
 </head>
 <body>
 
-    <!-- Sidebar -->
     <aside class="sidebar">
         <div class="brand-header">
             <i class="fa-solid fa-gas-pump"></i>
             <div>
-                <h1 id="txt-title">EGAS IT Jira</h1>
-                <span id="txt-subtitle">إدارة تكنولوجيا المعلومات</span>
+                <h1>EGAS IT Jira</h1>
+                <span data-key="subHeader">الشركة القابضة للغازات</span>
             </div>
         </div>
 
         <ul class="nav-links">
             <li class="nav-item active" onclick="switchTab('board', this)">
-                <a href="#"><i class="fa-solid fa-kanban"></i> <span class="lang-board">لوحة المهام (Board)</span></a>
+                <a href="#"><i class="fa-solid fa-kanban"></i> <span data-key="navBoard">لوحة المهام (Board)</span></a>
             </li>
             <li class="nav-item" onclick="switchTab('reports', this)">
-                <a href="#"><i class="fa-solid fa-chart-pie"></i> <span class="lang-reports">التقارير والانجازات</span></a>
+                <a href="#"><i class="fa-solid fa-chart-pie"></i> <span data-key="navReports">التقارير والانجازات</span></a>
             </li>
             <li class="nav-item" onclick="switchTab('categories', this)">
-                <a href="#"><i class="fa-solid fa-tags"></i> <span class="lang-categories">إدارة التصنيفات</span></a>
+                <a href="#"><i class="fa-solid fa-tags"></i> <span data-key="navCategories">إدارة التصنيفات</span></a>
             </li>
             <li class="nav-item" onclick="switchTab('team', this)">
-                <a href="#"><i class="fa-solid fa-users"></i> <span class="lang-team">إدارة أعضاء الفريق</span></a>
+                <a href="#"><i class="fa-solid fa-users"></i> <span data-key="navTeam">إدارة أعضاء الفريق</span></a>
             </li>
         </ul>
 
@@ -372,21 +134,20 @@
             <div class="avatar-leader">IK</div>
             <div>
                 <strong style="font-size: 13px; display: block;">Islam Elkady</strong>
-                <span style="font-size: 11px; opacity: 0.8;" class="lang-leader">Team Leader & Admin</span>
+                <span style="font-size: 11px; opacity: 0.8;" data-key="leaderRole">Team Leader & Admin</span>
             </div>
         </div>
     </aside>
 
-    <!-- Main Content -->
     <main class="main-content">
         <header class="top-navbar">
-            <div style="font-weight: bold; font-size: 16px;" id="current-page-title">
-                لوحة التحكم المباشرة (Jira Kanban)
+            <div style="font-weight: bold; font-size: 16px;" id="current-page-title" data-key="titleBoard">
+                لوحة التحكم المباشرة (Jira Board)
             </div>
 
             <div class="top-actions">
                 <button class="btn-action" onclick="openModal('taskModal')">
-                    <i class="fa-solid fa-plus"></i> <span class="lang-add-task">إضافة مهمة جديدة</span>
+                    <i class="fa-solid fa-plus"></i> <span data-key="addTaskBtn">إضافة مهمة جديدة</span>
                 </button>
 
                 <button class="icon-btn" onclick="toggleTheme()" title="تغيير المظهر">
@@ -412,12 +173,11 @@
 
         <div class="content-area">
             
-            <!-- Tab 1: Kanban Board -->
             <section id="tab-board" class="tab-panel active">
                 <div class="kanban-board">
                     <div class="kanban-col" ondragover="allowDrop(event)" ondrop="drop(event, 'todo')">
                         <div class="col-header">
-                            <span><i class="fa-regular fa-circle"></i> قيد الانتظار (To Do)</span>
+                            <span><i class="fa-regular fa-circle"></i> <span data-key="colTodo">قيد الانتظار (To Do)</span></span>
                             <span id="count-todo">0</span>
                         </div>
                         <div class="cards-container" id="col-todo"></div>
@@ -425,7 +185,7 @@
 
                     <div class="kanban-col" ondragover="allowDrop(event)" ondrop="drop(event, 'in_progress')">
                         <div class="col-header">
-                            <span><i class="fa-solid fa-spinner"></i> قيد التنفيذ (In Progress)</span>
+                            <span><i class="fa-solid fa-spinner"></i> <span data-key="colInProgress">قيد التنفيذ (In Progress)</span></span>
                             <span id="count-in_progress">0</span>
                         </div>
                         <div class="cards-container" id="col-in_progress"></div>
@@ -433,7 +193,7 @@
 
                     <div class="kanban-col" ondragover="allowDrop(event)" ondrop="drop(event, 'review')">
                         <div class="col-header">
-                            <span><i class="fa-solid fa-magnifying-glass"></i> للمراجعة (Review)</span>
+                            <span><i class="fa-solid fa-magnifying-glass"></i> <span data-key="colReview">للمراجعة (Review)</span></span>
                             <span id="count-review">0</span>
                         </div>
                         <div class="cards-container" id="col-review"></div>
@@ -441,7 +201,7 @@
 
                     <div class="kanban-col" ondragover="allowDrop(event)" ondrop="drop(event, 'done')">
                         <div class="col-header">
-                            <span><i class="fa-solid fa-circle-check" style="color: #10b981;"></i> مكتملة (Done)</span>
+                            <span><i class="fa-solid fa-circle-check" style="color: #10b981;"></i> <span data-key="colDone">مكتملة (Done)</span></span>
                             <span id="count-done">0</span>
                         </div>
                         <div class="cards-container" id="col-done"></div>
@@ -449,404 +209,123 @@
                 </div>
             </section>
 
-            <!-- Tab 2: Reports & Analytics -->
             <section id="tab-reports" class="tab-panel">
                 <div class="stats-grid">
                     <div class="stat-card">
                         <h3 id="stat-total">0</h3>
-                        <p>إجمالي المهام المطلوبة</p>
+                        <p data-key="statTotal">إجمالي المهام</p>
                     </div>
                     <div class="stat-card">
                         <h3 id="stat-completed" style="color: #10b981;">0</h3>
-                        <p>المهام المسلمة (Done)</p>
+                        <p data-key="statDone">المهام المكتملة</p>
                     </div>
                     <div class="stat-card">
                         <h3 id="stat-pending" style="color: #f59e0b;">0</h3>
-                        <p>المهام الجاري العمل عليها</p>
+                        <p data-key="statPending">المهام المتبقية</p>
                     </div>
                     <div class="stat-card">
                         <h3 id="stat-rate" style="color: #3b82f6;">0%</h3>
-                        <p>معدل إنجاز الفريق الكلي</p>
+                        <p data-key="statRate">نسبة الانجاز الكلية</p>
                     </div>
                 </div>
 
-                <h3 style="margin-bottom: 15px;">تقرير أداء أعضاء تيم IT - شركة EGAS</h3>
+                <div class="charts-grid">
+                    <div class="chart-card">
+                        <h4 style="margin-bottom: 10px;" data-key="chartStatusTitle">توزيع حالات المهام</h4>
+                        <canvas id="statusChart"></canvas>
+                    </div>
+                    <div class="chart-card">
+                        <h4 style="margin-bottom: 10px;" data-key="chartMemberTitle">إنجاز المهام لكل موظف</h4>
+                        <canvas id="memberChart"></canvas>
+                    </div>
+                </div>
+
+                <h3 style="margin-bottom: 15px;" data-key="tableTitle">تقرير أداء أعضاء تيم IT - شركة EGAS</h3>
                 <table class="report-table">
                     <thead>
                         <tr>
-                            <th>الموظف</th>
-                            <th>المسمى الوظيفي</th>
-                            <th>المهام المسندة</th>
-                            <th>تم التسليم</th>
-                            <th>قيد التنفيذ</th>
-                            <th>نسبة الإنجاز</th>
+                            <th data-key="thMember">الموظف</th>
+                            <th data-key="thRole">المسمى الوظيفي</th>
+                            <th data-key="thTotal">المهام المسندة</th>
+                            <th data-key="thDone">تم التسليم</th>
+                            <th data-key="thProgress">قيد التنفيذ</th>
+                            <th data-key="thRate">نسبة الإنجاز</th>
                         </tr>
                     </thead>
                     <tbody id="team-report-body"></tbody>
                 </table>
             </section>
 
-            <!-- Tab 3: Managing Categories -->
             <section id="tab-categories" class="tab-panel">
                 <div style="max-width: 600px; background: var(--bg-card); padding: 20px; border-radius: 8px; border: 1px solid var(--border-color);">
-                    <h3>إدارة التصنيفات (Categories)</h3>
-                    <p style="font-size: 13px; color: var(--text-sub); margin-bottom: 15px;">يمكنك إضافة تصنيفات جديدة للمهام أو إزالة التصنيفات الحالية.</p>
+                    <h3 data-key="catTitle">إدارة التصنيفات (Categories)</h3>
+                    <p style="font-size: 13px; color: var(--text-sub); margin-bottom: 15px;" data-key="catSub">إضافة وتعديل مجالات العمل في القسم.</p>
                     
                     <div style="display: flex; gap: 10px; margin-bottom: 20px;">
-                        <input type="text" id="new-cat-input" placeholder="اسم التصنيف الجديد (مثال: Infrastructure)..." style="flex-grow: 1; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px;">
-                        <button class="btn-action" onclick="addCategory()">إضافة</button>
+                        <input type="text" id="new-cat-input" placeholder="اسم التصنيف الجديد..." style="flex-grow: 1; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px;">
+                        <button class="btn-action" onclick="addCategory()" data-key="btnAdd">إضافة</button>
                     </div>
 
-                    <ul class="category-list" id="categories-container-list"></ul>
+                    <ul id="categories-container-list" style="list-style: none;"></ul>
                 </div>
             </section>
 
-            <!-- Tab 4: Team Management -->
             <section id="tab-team" class="tab-panel">
                 <div style="max-width: 650px; background: var(--bg-card); padding: 20px; border-radius: 8px; border: 1px solid var(--border-color);">
-                    <h3>إدارة أعضاء الفريق (EGAS IT Members)</h3>
-                    <p style="font-size: 13px; color: var(--text-sub); margin-bottom: 15px;">التيم ليدر المسؤول: <strong>Islam Elkady</strong></p>
+                    <h3 data-key="teamTitle">إدارة أعضاء الفريق (EGAS IT Members)</h3>
+                    <p style="font-size: 13px; color: var(--text-sub); margin-bottom: 15px;">Team Leader: <strong>Islam Elkady</strong></p>
                     
                     <div style="display: flex; gap: 10px; margin-bottom: 20px;">
                         <input type="text" id="new-member-name" placeholder="اسم الموظف الجديد..." style="flex-grow: 1; padding: 10px; border: 1px solid var(--border-color); border-radius: 6px;">
-                        <button class="btn-action" onclick="addTeamMember()">إضافة موظف</button>
+                        <button class="btn-action" onclick="addTeamMember()" data-key="btnAddMember">إضافة موظف</button>
                     </div>
 
-                    <ul class="team-list" id="team-members-container-list"></ul>
+                    <ul id="team-members-container-list" style="list-style: none;"></ul>
                 </div>
             </section>
 
         </div>
     </main>
 
-    <!-- Modal: Add New Task -->
     <div class="modal" id="taskModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>إضافة مهمة جديدة (New Jira Issue)</h3>
+                <h3 data-key="modalAddTaskTitle">إضافة مهمة جديدة</h3>
                 <button class="close-btn" onclick="closeModal('taskModal')">&times;</button>
             </div>
             <form id="add-task-form" onsubmit="handleAddTask(event)">
                 <div class="form-group">
-                    <label>عنوان المهمة</label>
-                    <input type="text" id="task-title-input" required placeholder="مثال: تحديث سيرفرات الشفرة والاتصالات">
+                    <label data-key="lblTaskTitle">عنوان المهمة</label>
+                    <input type="text" id="task-title-input" required placeholder="مثال: صيانه السيرفرات">
                 </div>
                 <div class="form-group">
-                    <label>التصنيف (Category)</label>
+                    <label data-key="lblCat">التصنيف</label>
                     <select id="task-cat-select" required></select>
                 </div>
                 <div class="form-group">
-                    <label>الموظف المسؤول</label>
+                    <label data-key="lblAssignee">الموظف المسؤول</label>
                     <select id="task-assignee-select" required></select>
                 </div>
                 <div class="form-group">
-                    <label>تاريخ الاستحقاق (Due Date)</label>
+                    <label data-key="lblDate">تاريخ الاستحقاق</label>
                     <input type="date" id="task-date-input" required>
                 </div>
-                <button type="submit" class="btn-action" style="width: 100%; justify-content: center;">إنشاء المهمة</button>
+                <button type="submit" class="btn-action" style="width: 100%; justify-content: center;" data-key="btnCreateTask">إنشاء المهمة</button>
             </form>
         </div>
     </div>
 
-    <!-- Notification Modal/Panel -->
     <div class="modal" id="notifModal">
         <div class="modal-content">
             <div class="modal-header">
-                <h3>التنبيهات والإشعارات</h3>
+                <h3 data-key="notifTitle">التنبيهات والمهام المطلوبة</h3>
                 <button class="close-btn" onclick="closeModal('notifModal')">&times;</button>
             </div>
             <div id="notif-list" style="display: flex; flex-direction: column; gap: 10px; max-height: 300px; overflow-y: auto;"></div>
         </div>
     </div>
 
-    <script>
-        // Default Data Initialization
-        const defaultTeam = ["Islam Elkady (Leader)", "Mohamed", "Marwa", "Sherief", "Sohila", "Maghraby", "Mamdouh"];
-        const defaultCategories = ["AI", "Training", "Communication", "Cyber Security"];
-        
-        let state = {
-            tasks: JSON.parse(localStorage.getItem('egas_tasks')) || [
-                { id: 1, title: "تطوير نموذج الذكاء الاصطناعي لتحليل بيانات الغاز", category: "AI", assignee: "Mohamed", status: "in_progress", date: "2026-08-25" },
-                { id: 2, title: "فحص الاختراق الدوري لشبكة EGAS", category: "Cyber Security", assignee: "Sherief", status: "todo", date: "2026-08-30" },
-                { id: 3, title: "دورة تدريبية للعاملين على الأمن السيبراني", category: "Training", assignee: "Marwa", status: "review", date: "2026-08-22" },
-                { id: 4, title: "ترقية أجهزة السويتشات بسنترال الشركة", category: "Communication", assignee: "Maghraby", status: "done", date: "2026-08-15" }
-            ],
-            categories: JSON.parse(localStorage.getItem('egas_cats')) || defaultCategories,
-            team: JSON.parse(localStorage.getItem('egas_team')) || defaultTeam,
-            lang: localStorage.getItem('egas_lang') || 'ar',
-            theme: localStorage.getItem('egas_theme') || 'light'
-        };
-
-        // Guard Check Authentication
-        if (!localStorage.getItem('isLoggedIn')) {
-            window.location.href = 'login.html';
-        }
-
-        // Initialize Application
-        document.addEventListener('DOMContentLoaded', () => {
-            applyTheme(state.theme);
-            renderAll();
-        });
-
-        function saveState() {
-            localStorage.setItem('egas_tasks', JSON.stringify(state.tasks));
-            localStorage.setItem('egas_cats', JSON.stringify(state.categories));
-            localStorage.setItem('egas_team', JSON.stringify(state.team));
-            localStorage.setItem('egas_lang', state.lang);
-            localStorage.setItem('egas_theme', state.theme);
-        }
-
-        function renderAll() {
-            renderBoard();
-            renderReports();
-            renderCategories();
-            renderTeam();
-            updateSelects();
-            updateNotifications();
-            saveState();
-        }
-
-        // Switch Tabs
-        function switchTab(tabId, element) {
-            document.querySelectorAll('.tab-panel').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            
-            document.getElementById(`tab-${tabId}`).classList.add('active');
-            element.classList.add('active');
-
-            const titles = {
-                board: 'لوحة التحكم المباشرة (Jira Kanban)',
-                reports: 'تقارير الأداء ومتابعة تسليمات الموظفين',
-                categories: 'إدارة وتعديل التصنيفات (Categories)',
-                team: 'إدارة أعضاء فريق تكنولوجيا المعلومات'
-            };
-            document.getElementById('current-page-title').innerText = titles[tabId];
-        }
-
-        // Render Kanban Board
-        function renderBoard() {
-            const cols = { todo: [], in_progress: [], review: [], done: [] };
-            state.tasks.forEach(task => {
-                if(cols[task.status]) cols[task.status].push(task);
-            });
-
-            for (let key in cols) {
-                const container = document.getElementById(`col-${key}`);
-                document.getElementById(`count-${key}`).innerText = cols[key].length;
-                container.innerHTML = '';
-
-                cols[key].forEach(task => {
-                    const card = document.createElement('div');
-                    card.className = 'task-card';
-                    card.draggable = true;
-                    card.ondragstart = (e) => e.dataTransfer.setData('text/plain', task.id);
-
-                    const catClass = task.category === 'AI' ? 'tag-ai' :
-                                     task.category === 'Training' ? 'tag-training' :
-                                     task.category === 'Communication' ? 'tag-communication' : 'tag-cyber';
-
-                    card.innerHTML = `
-                        <span class="task-tag ${catClass}">${task.category}</span>
-                        <div class="task-title">${task.title}</div>
-                        <div class="task-footer">
-                            <span><i class="fa-regular fa-clock"></i> ${task.date}</span>
-                            <div class="assignee-avatar" title="${task.assignee}">${task.assignee.substring(0, 2).toUpperCase()}</div>
-                        </div>
-                    `;
-                    container.appendChild(card);
-                });
-            }
-        }
-
-        // Drag and Drop
-        function allowDrop(ev) { ev.preventDefault(); }
-        function drop(ev, newStatus) {
-            ev.preventDefault();
-            const taskId = ev.dataTransfer.getData('text/plain');
-            const task = state.tasks.find(t => t.id == taskId);
-            if (task) {
-                task.status = newStatus;
-                renderAll();
-            }
-        }
-
-        // Add Task
-        function handleAddTask(e) {
-            e.preventDefault();
-            const title = document.getElementById('task-title-input').value;
-            const category = document.getElementById('task-cat-select').value;
-            const assignee = document.getElementById('task-assignee-select').value;
-            const date = document.getElementById('task-date-input').value;
-
-            state.tasks.push({
-                id: Date.now(),
-                title, category, assignee, date,
-                status: 'todo'
-            });
-
-            closeModal('taskModal');
-            document.getElementById('add-task-form').reset();
-            renderAll();
-        }
-
-        // Reports and Analytics Rendering
-        function renderReports() {
-            const total = state.tasks.length;
-            const completed = state.tasks.filter(t => t.status === 'done').length;
-            const pending = total - completed;
-            const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
-
-            document.getElementById('stat-total').innerText = total;
-            document.getElementById('stat-completed').innerText = completed;
-            document.getElementById('stat-pending').innerText = pending;
-            document.getElementById('stat-rate').innerText = `${rate}%`;
-
-            const tbody = document.getElementById('team-report-body');
-            tbody.innerHTML = '';
-
-            state.team.forEach(member => {
-                const memberTasks = state.tasks.filter(t => t.assignee === member);
-                const memberDone = memberTasks.filter(t => t.status === 'done').length;
-                const memberProgress = memberTasks.filter(t => t.status !== 'done').length;
-                const memberRate = memberTasks.length > 0 ? Math.round((memberDone / memberTasks.length) * 100) : 0;
-
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td><strong>${member}</strong></td>
-                    <td>${member.includes('Leader') ? 'Team Leader' : 'IT Specialist'}</td>
-                    <td>${memberTasks.length}</td>
-                    <td style="color: #10b981; font-weight: bold;">${memberDone}</td>
-                    <td style="color: #f59e0b;">${memberProgress}</td>
-                    <td><strong>${memberRate}%</strong></td>
-                `;
-                tbody.appendChild(row);
-            });
-        }
-
-        // Manage Categories
-        function renderCategories() {
-            const container = document.getElementById('categories-container-list');
-            container.innerHTML = '';
-            state.categories.forEach(cat => {
-                const li = document.createElement('li');
-                li.className = 'item-row';
-                li.innerHTML = `
-                    <span><i class="fa-solid fa-tag"></i> ${cat}</span>
-                    <button class="btn-delete" onclick="deleteCategory('${cat}')"><i class="fa-solid fa-trash"></i></button>
-                `;
-                container.appendChild(li);
-            });
-        }
-
-        function addCategory() {
-            const val = document.getElementById('new-cat-input').value.trim();
-            if (val && !state.categories.includes(val)) {
-                state.categories.push(val);
-                document.getElementById('new-cat-input').value = '';
-                renderAll();
-            }
-        }
-
-        function deleteCategory(cat) {
-            state.categories = state.categories.filter(c => c !== cat);
-            renderAll();
-        }
-
-        // Manage Team Members
-        function renderTeam() {
-            const container = document.getElementById('team-members-container-list');
-            container.innerHTML = '';
-            state.team.forEach(member => {
-                const li = document.createElement('li');
-                li.className = 'item-row';
-                li.innerHTML = `
-                    <span><i class="fa-solid fa-user"></i> ${member}</span>
-                    ${!member.includes('Leader') ? `<button class="btn-delete" onclick="deleteTeamMember('${member}')"><i class="fa-solid fa-trash"></i></button>` : '<span style="font-size:11px; color:#10b981;">Admin Leader</span>'}
-                `;
-                container.appendChild(li);
-            });
-        }
-
-        function addTeamMember() {
-            const val = document.getElementById('new-member-name').value.trim();
-            if (val && !state.team.includes(val)) {
-                state.team.push(val);
-                document.getElementById('new-member-name').value = '';
-                renderAll();
-            }
-        }
-
-        function deleteTeamMember(member) {
-            state.team = state.team.filter(m => m !== member);
-            renderAll();
-        }
-
-        function updateSelects() {
-            const catSelect = document.getElementById('task-cat-select');
-            const memberSelect = document.getElementById('task-assignee-select');
-            
-            catSelect.innerHTML = state.categories.map(c => `<option value="${c}">${c}</option>`).join('');
-            memberSelect.innerHTML = state.team.map(m => `<option value="${m}">${m}</option>`).join('');
-        }
-
-        // Notifications System
-        function updateNotifications() {
-            const pending = state.tasks.filter(t => t.status !== 'done');
-            document.getElementById('notif-count').innerText = pending.length;
-
-            const list = document.getElementById('notif-list');
-            list.innerHTML = '';
-            
-            if (pending.length === 0) {
-                list.innerHTML = '<p style="text-align:center; color: var(--text-sub);">جميع المهام مُسلمة بنجاح!</p>';
-            } else {
-                pending.forEach(t => {
-                    const item = document.createElement('div');
-                    item.style.padding = '10px';
-                    item.style.borderBottom = '1px solid var(--border-color)';
-                    item.innerHTML = `<strong>${t.title}</strong><br><small>المسؤول: ${t.assignee} | الموعد: ${t.date}</small>`;
-                    list.appendChild(item);
-                });
-            }
-        }
-
-        function toggleNotifications() { openModal('notifModal'); }
-
-        // Dark/Light Theme Switch
-        function toggleTheme() {
-            state.theme = state.theme === 'light' ? 'dark' : 'light';
-            applyTheme(state.theme);
-            saveState();
-        }
-
-        function applyTheme(theme) {
-            document.documentElement.setAttribute('data-theme', theme);
-            const icon = document.getElementById('theme-icon');
-            if (theme === 'dark') {
-                icon.className = 'fa-solid fa-sun';
-            } else {
-                icon.className = 'fa-solid fa-moon';
-            }
-        }
-
-        // Language Toggle (RTL / LTR)
-        function toggleLanguage() {
-            state.lang = state.lang === 'ar' ? 'en' : 'ar';
-            document.documentElement.setAttribute('dir', state.lang === 'ar' ? 'rtl' : 'ltr');
-            document.documentElement.setAttribute('lang', state.lang);
-            saveState();
-            alert(state.lang === 'ar' ? 'تم تحويل الواجهة إلى العربية' : 'Switched interface to English');
-        }
-
-        // Modals Controls
-        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-
-        // Logout
-        function logout() {
-            localStorage.removeItem('isLoggedIn');
-            window.location.href = 'login.html';
-        }
-    </script>
+    <!-- ربط السكريبت الخارجي -->
+    <script src="script.js"></script>
 </body>
 </html>
