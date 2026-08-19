@@ -11,7 +11,7 @@ const translations = {
         navCategories: "إدارة التصنيفات",
         navTeam: "إدارة أعضاء الفريق",
         leaderRole: "Team Leader & Admin",
-        titleBoard: "لوحة التحكم المباشرة (Jira Board)",
+        titleBoard: "لوحة التحكم المباشرة ( Board)",
         titleReports: "تقارير الأداء ومتابعة تسليمات الموظفين",
         titleCategories: "إدارة وتعديل التصنيفات (Categories)",
         titleTeam: "إدارة أعضاء فريق تكنولوجيا المعلومات",
