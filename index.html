@@ -11,7 +11,7 @@
     <script>
         // التحقق من حالة تسجيل الدخول فوراً قبل تحميل الصفحة
         if (localStorage.getItem('isLoggedIn') !== 'true') {
-            window.location.href = 'login.html';
+            window.location.href = './login.html';
         }
     </script>
     <style>
@@ -233,7 +233,7 @@
             display: block;
         }
 
-        /* Jira Board Layout */
+        /* Board Layout */
         .board-header {
             display: flex;
             justify-content: space-between;
@@ -529,8 +529,8 @@
             </div>
             <ul class="nav-list">
                 <li class="nav-item active" onclick="switchTab('board', this)">
-                    <i class="fa-solid fa-kanban"></i>
-                    <span data-key="navBoard">لوحة Jira</span>
+                    <i class="fa-solid fa-gauge-high"></i>
+                    <span data-key="navBoard">Dashboard</span>
                 </li>
                 <li class="nav-item" onclick="switchTab('reports', this)">
                     <i class="fa-solid fa-chart-pie"></i>
@@ -562,7 +562,7 @@
     <div class="main-wrapper">
         <!-- Top Header Controls -->
         <header class="top-navbar">
-            <h3 id="current-page-title" data-key="titleBoard">لوحة التحكم المباشرة (Jira Board)</h3>
+            <h3 id="current-page-title" data-key="titleBoard">Dashboard</h3>
             <div class="header-actions">
                 <button class="icon-btn" onclick="toggleTheme()" title="تغيير الثيم">
                     <i class="fa-solid fa-moon" id="theme-icon"></i>
@@ -580,7 +580,7 @@
         <!-- Body Area -->
         <main class="content-body">
             
-            <!-- Tab 1: Jira Board -->
+            <!-- Tab 1: Dashboard Board -->
             <section id="tab-board" class="tab-panel active">
                 <div class="board-header">
                     <h2></h2>
@@ -743,12 +743,12 @@
         const translations = {
             ar: {
                 subHeader: "شركة إيجاس - IT",
-                navBoard: "لوحة Jira",
+                navBoard: "Dashboard",
                 navReports: "التقارير والإحصائيات",
                 navCategories: "إدارة التصنيفات",
                 navTeam: "إدارة الفريق",
                 leaderRole: "قائد الفريق (Admin)",
-                titleBoard: "لوحة التحكم المباشرة (Jira Board)",
+                titleBoard: "Dashboard",
                 titleReports: "تقارير الأداء ومتابعة تسليمات الموظفين",
                 titleCategories: "إدارة وتعديل التصنيفات (Categories)",
                 titleTeam: "إدارة أعضاء فريق تكنولوجيا المعلومات",
@@ -785,12 +785,12 @@
             },
             en: {
                 subHeader: "EGAS Holding Company",
-                navBoard: "Jira Board",
+                navBoard: "Dashboard",
                 navReports: "Reports & Analytics",
                 navCategories: "Manage Categories",
                 navTeam: "Team Management",
                 leaderRole: "Team Leader & Admin",
-                titleBoard: "Live Task Board (Jira Board)",
+                titleBoard: "Dashboard",
                 titleReports: "Employee Performance & Delivery Reports",
                 titleCategories: "Manage Category Domains",
                 titleTeam: "IT Team Members Management",
@@ -850,7 +850,6 @@
         let memberChartObj = null;
 
         document.addEventListener('DOMContentLoaded', () => {
-            // تحديث اسم المستخدم المسجل
             const currentUser = localStorage.getItem('currentUser');
             if (currentUser) {
                 document.getElementById('user-display-name').innerText = currentUser;
@@ -1165,11 +1164,11 @@
         function openModal(id) { document.getElementById(id).style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
-        // وظيفة تسجيل الخروج المعدلة
+        // وظيفة تسجيل الخروج المحدثة
         function logout() {
             localStorage.removeItem('isLoggedIn');
             localStorage.removeItem('currentUser');
-            window.location.href = 'login.html';
+            window.location.href = './login.html';
         }
     </script>
 </body>
