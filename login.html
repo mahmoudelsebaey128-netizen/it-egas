@@ -112,7 +112,7 @@
     <div class="login-card">
         <div class="brand-logo"><i class="fa-solid fa-gas-pump"></i></div>
         <h2>GasTrack EGAS</h2>
-        <div class="sub-title">إدارة تكنولوجيا المعلومات والعمليات</div>
+        <div class="sub-title">الشركة المصرية القابضة للغازات الطبيعية - قطاع IT</div>
         
         <div id="alert-box"></div>
 
@@ -139,15 +139,13 @@
             e.preventDefault();
             const email = document.getElementById('email').value.trim();
 
-            // حفظ حالة الدخول والإيميل مباشرة وبدون تعليق
             localStorage.setItem('isLoggedIn', 'true');
             localStorage.setItem('userEmail', email);
 
-            alertBox.innerText = 'تم تسجيل الدخول بنجاح! جاري تحويلك للموقع...';
+            alertBox.innerText = 'تم تسجيل الدخول بنجاح! جاري تحويلك لوحة التحكم...';
             alertBox.className = 'success';
             alertBox.style.display = 'block';
 
-            // التحويل المباشر لصفحة index.html
             setTimeout(function() {
                 window.location.href = 'index.html';
             }, 300);
