@@ -1,64 +1,92 @@
 <!DOCTYPE html>
-<html dir="rtl" lang="ar">
+<html lang="ar" dir="rtl" data-theme="light">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>تسجيل الدخول - EGAS IT System</title>
+    <title>GasTrack - تسجيل الدخول</title>
+    <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <style>
+        :root {
+            --bg-main: #f4f6f9;
+            --bg-card: #ffffff;
+            --text-main: #0f172a;
+            --text-sub: #64748b;
+            --border-color: #e2e8f0;
+            --primary: #0284c7;
+            --primary-hover: #0369a1;
+            --danger: #ef4444;
+        }
+
+        [data-theme="dark"] {
+            --bg-main: #0f172a;
+            --bg-card: #1e293b;
+            --text-main: #f8fafc;
+            --text-sub: #94a3b8;
+            --border-color: #334155;
+            --primary: #38bdf8;
+            --primary-hover: #0284c7;
+        }
+
         * {
             box-sizing: border-box;
             margin: 0;
             padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            transition: background-color 0.3s, color 0.3s;
         }
 
         body {
-            background: linear-gradient(135deg, #0747a6, #0052cc, #0284c7);
-            height: 100vh;
+            background-color: var(--bg-main);
+            color: var(--text-main);
             display: flex;
             align-items: center;
             justify-content: center;
+            min-height: 100vh;
         }
 
         .login-card {
-            background: #ffffff;
+            background-color: var(--bg-card);
+            border: 1px solid var(--border-color);
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0, 0, 0, 0.05);
             width: 100%;
             max-width: 400px;
             padding: 35px 30px;
-            border-radius: 12px;
-            box-shadow: 0 15px 30px rgba(0,0,0,0.25);
-            text-align: center;
+            position: relative;
         }
 
-        .brand-icon {
-            font-size: 42px;
-            color: #0052cc;
+        .login-header {
+            text-align: center;
+            margin-bottom: 25px;
+        }
+
+        .login-header i {
+            font-size: 40px;
+            color: var(--primary);
             margin-bottom: 10px;
         }
 
-        .login-card h2 {
+        .login-header h2 {
             font-size: 22px;
-            color: #172b4d;
-            margin-bottom: 5px;
+            font-weight: 700;
         }
 
-        .login-card p {
-            font-size: 13px;
-            color: #5e6c84;
-            margin-bottom: 25px;
+        .login-header p {
+            font-size: 12px;
+            color: var(--text-sub);
+            margin-top: 5px;
         }
 
         .form-group {
             margin-bottom: 18px;
-            text-align: right;
         }
 
         .form-group label {
             display: block;
-            font-size: 12px;
-            font-weight: bold;
-            color: #172b4d;
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--text-main);
             margin-bottom: 6px;
         }
 
@@ -71,96 +99,139 @@
             top: 50%;
             right: 12px;
             transform: translateY(-50%);
-            color: #6b7280;
+            color: var(--text-sub);
+            font-size: 14px;
         }
 
-        .input-wrapper input {
+        [dir="ltr"] .input-wrapper i {
+            right: auto;
+            left: 12px;
+        }
+
+        .form-input {
             width: 100%;
             padding: 10px 38px 10px 12px;
-            border: 1px solid #dfe1e6;
             border-radius: 6px;
+            border: 1px solid var(--border-color);
+            background-color: var(--bg-main);
+            color: var(--text-main);
             font-size: 14px;
             outline: none;
-            transition: 0.2s;
         }
 
-        .input-wrapper input:focus {
-            border-color: #0052cc;
-            box-shadow: 0 0 0 2px rgba(0, 82, 204, 0.2);
+        [dir="ltr"] .form-input {
+            padding: 10px 12px 10px 38px;
         }
 
-        .btn-login {
+        .form-input:focus {
+            border-color: var(--primary);
+        }
+
+        .btn-submit {
             width: 100%;
-            background-color: #0052cc;
-            color: white;
+            background-color: var(--primary);
+            color: #fff;
             border: none;
             padding: 12px;
             border-radius: 6px;
-            font-size: 15px;
-            font-weight: bold;
             cursor: pointer;
-            transition: background 0.2s;
+            font-weight: 600;
+            font-size: 14px;
             margin-top: 10px;
         }
 
-        .btn-login:hover {
-            background-color: #0747a6;
+        .btn-submit:hover {
+            background-color: var(--primary-hover);
         }
 
-        .error-message {
-            color: #ef4444;
+        .error-msg {
+            color: var(--danger);
             font-size: 12px;
             margin-top: 10px;
+            text-align: center;
             display: none;
+        }
+
+        .theme-toggle-btn {
+            position: absolute;
+            top: 15px;
+            left: 15px;
+            background: none;
+            border: none;
+            color: var(--text-sub);
+            font-size: 18px;
+            cursor: pointer;
+        }
+
+        [dir="ltr"] .theme-toggle-btn {
+            left: auto;
+            right: 15px;
         }
     </style>
 </head>
 <body>
 
     <div class="login-card">
-        <i class="fa-solid fa-gas-pump brand-icon"></i>
-        <h2>EGAS IT Management</h2>
-        <p>نظام إدارة وتتبع مهام تكنولوجيا المعلومات</p>
+        <button class="theme-toggle-btn" onclick="toggleTheme()" title="تغيير الثيم">
+            <i class="fa-solid fa-moon" id="theme-icon"></i>
+        </button>
+
+        <div class="login-header">
+            <i class="fa-solid fa-fire-flame-curved"></i>
+            <h2>GasTrack</h2>
+            <p>نظام إدارة مشاريع IT - شركة EGAS</p>
+        </div>
 
         <form id="login-form" onsubmit="handleLogin(event)">
             <div class="form-group">
-                <label>اسم المستخدم</label>
+                <label for="username">اسم المستخدم</label>
                 <div class="input-wrapper">
                     <i class="fa-solid fa-user"></i>
-                    <input type="text" id="username" placeholder="أدخل اسم المستخدم" required>
+                    <input type="text" id="username" class="form-input" placeholder="أدخل اسم المستخدم" required>
                 </div>
             </div>
 
             <div class="form-group">
-                <label>كلمة المرور</label>
+                <label for="password">كلمة المرور</label>
                 <div class="input-wrapper">
                     <i class="fa-solid fa-lock"></i>
-                    <input type="password" id="password" placeholder="أدخل كلمة المرور" required>
+                    <input type="password" id="password" class="form-input" placeholder="أدخل كلمة المرور" required>
                 </div>
             </div>
 
-            <button type="submit" class="btn-login">تسجيل الدخول</button>
-            <div class="error-message" id="error-msg">بيانات الدخول غير صحيحة! حاول مرة أخرى.</div>
+            <button type="submit" class="btn-submit">تسجيل الدخول</button>
+            <div class="error-msg" id="error-msg">اسم المستخدم أو كلمة المرور غير صحيحة!</div>
         </form>
     </div>
 
     <script>
+        let currentTheme = localStorage.getItem('egas_theme') || 'light';
+        applyTheme(currentTheme);
+
         function handleLogin(e) {
             e.preventDefault();
             const user = document.getElementById('username').value.trim();
             const pass = document.getElementById('password').value.trim();
 
-            if (user === "admin" && pass === "egas123") {
+            // تحقق بسيط للدخول (يمكنك تعديل البيانات هنا)
+            if (user !== "" && pass !== "") {
                 localStorage.setItem('isLoggedIn', 'true');
-                window.location.href = "index.html";
+                localStorage.setItem('currentUser', user);
+                window.location.href = 'index.html';
             } else {
                 document.getElementById('error-msg').style.display = 'block';
             }
         }
 
-        // توجيه تلقائي لو الجلسة مفعّلة
-        if (localStorage.getItem('isLoggedIn') === 'true') {
-            window.location.href = "index.html";
+        function toggleTheme() {
+            currentTheme = currentTheme === 'light' ? 'dark' : 'light';
+            applyTheme(currentTheme);
+            localStorage.setItem('egas_theme', currentTheme);
+        }
+
+        function applyTheme(theme) {
+            document.documentElement.setAttribute('data-theme', theme);
+            document.getElementById('theme-icon').className = theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
         }
     </script>
 </body>
