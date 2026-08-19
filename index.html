@@ -1,43 +1,29 @@
 <!DOCTYPE html>
-<html lang="ar" dir="rtl" data-theme="light">
+<html lang="ar" dir="rtl">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>GasTrack - EGAS IT Project Management</title>
-    <!-- FontAwesome Icons -->
+    <title>GasTrack - EGAS IT System</title>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <!-- Chart.js -->
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script>
-        // التحقق من حالة تسجيل الدخول فوراً قبل تحميل الصفحة
-        if (localStorage.getItem('isLoggedIn') !== 'true') {
-            window.location.href = './login.html';
-        }
-    </script>
     <style>
         :root {
-            --bg-main: #f4f6f9;
-            --bg-card: #ffffff;
-            --bg-sidebar: #1e293b;
-            --text-main: #0f172a;
-            --text-sub: #64748b;
+            --bg-color: #f4f6f9;
+            --card-bg: #ffffff;
+            --text-color: #333333;
+            --primary-color: #0056b3;
+            --sidebar-bg: #1e293b;
+            --sidebar-text: #ffffff;
             --border-color: #e2e8f0;
-            --primary: #0284c7;
-            --primary-hover: #0369a1;
-            --accent: #f59e0b;
-            --danger: #ef4444;
-            --success: #10b981;
         }
 
-        [data-theme="dark"] {
-            --bg-main: #0f172a;
-            --bg-card: #1e293b;
-            --bg-sidebar: #0f172a;
-            --text-main: #f8fafc;
-            --text-sub: #94a3b8;
+        body.dark-mode {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --text-color: #f8fafc;
+            --primary-color: #3b82f6;
+            --sidebar-bg: #020617;
+            --sidebar-text: #f8fafc;
             --border-color: #334155;
-            --primary: #38bdf8;
-            --primary-hover: #0284c7;
         }
 
         * {
@@ -45,1131 +31,212 @@
             margin: 0;
             padding: 0;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            transition: background-color 0.3s, color 0.3s;
         }
 
         body {
-            background-color: var(--bg-main);
-            color: var(--text-main);
+            background-color: var(--bg-color);
+            color: var(--text-color);
             display: flex;
             height: 100vh;
             overflow: hidden;
         }
 
-        /* Sidebar Styles */
+        /* Sidebar */
         .sidebar {
-            width: 260px;
-            background-color: var(--bg-sidebar);
-            color: #fff;
+            width: 250px;
+            background-color: var(--sidebar-bg);
+            color: var(--sidebar-text);
             display: flex;
             flex-direction: column;
             justify-content: space-between;
             padding: 20px 0;
-            flex-shrink: 0;
         }
 
         .brand {
-            padding: 0 20px 20px;
-            border-bottom: 1px solid #334155;
-            display: flex;
-            align-items: center;
-            gap: 12px;
+            font-size: 1.5rem;
+            font-weight: bold;
+            text-align: center;
+            padding-bottom: 20px;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.1);
         }
 
-        .brand i {
-            font-size: 24px;
-            color: var(--primary);
-        }
-
-        .brand-text h2 {
-            font-size: 18px;
-            font-weight: 700;
-            letter-spacing: 1px;
-        }
-
-        .brand-text p {
-            font-size: 11px;
-            color: #94a3b8;
-        }
-
-        .nav-list {
+        .nav-links {
             list-style: none;
             margin-top: 20px;
         }
 
         .nav-item {
-            padding: 12px 20px;
+            padding: 15px 25px;
+            cursor: pointer;
             display: flex;
             align-items: center;
             gap: 12px;
-            cursor: pointer;
-            color: #94a3b8;
-            font-size: 14px;
-            font-weight: 500;
-            border-right: 4px solid transparent;
-        }
-
-        [dir="ltr"] .nav-item {
-            border-right: none;
-            border-left: 4px solid transparent;
+            transition: 0.3s;
         }
 
         .nav-item:hover, .nav-item.active {
-            background-color: rgba(255, 255, 255, 0.05);
-            color: #fff;
+            background-color: rgba(255, 255, 255, 0.1);
+            border-right: 4px solid var(--primary-color);
         }
 
-        .nav-item.active {
-            border-color: var(--primary);
-            color: var(--primary);
-        }
-
-        .user-profile {
-            padding: 15px 20px;
-            border-top: 1px solid #334155;
+        .sidebar-footer {
+            padding: 0 20px;
             display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
-
-        .user-info {
-            display: flex;
-            align-items: center;
+            flex-direction: column;
             gap: 10px;
         }
 
-        .avatar {
-            width: 36px;
-            height: 36px;
-            border-radius: 50%;
-            background-color: var(--primary);
+        .btn-action {
+            width: 100%;
+            padding: 10px;
+            border: none;
+            border-radius: 6px;
+            cursor: pointer;
+            background-color: rgba(255, 255, 255, 0.1);
+            color: #fff;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-weight: bold;
-            color: #fff;
-        }
-
-        .user-details h4 {
-            font-size: 13px;
-            color: #fff;
-        }
-
-        .user-details p {
-            font-size: 11px;
-            color: #94a3b8;
-        }
-
-        .logout-btn {
-            background: none;
-            border: none;
-            color: #ef4444;
-            cursor: pointer;
-            font-size: 16px;
-        }
-
-        /* Main Content Layout */
-        .main-wrapper {
-            flex: 1;
-            display: flex;
-            flex-direction: column;
-            overflow: hidden;
-        }
-
-        .top-navbar {
-            height: 60px;
-            background-color: var(--bg-card);
-            border-bottom: 1px solid var(--border-color);
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            padding: 0 25px;
-        }
-
-        .header-actions {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .icon-btn {
-            background: none;
-            border: none;
-            color: var(--text-sub);
-            font-size: 18px;
-            cursor: pointer;
-            position: relative;
-            padding: 8px;
-            border-radius: 50%;
-        }
-
-        .icon-btn:hover {
-            background-color: var(--bg-main);
-            color: var(--text-main);
-        }
-
-        .badge {
-            position: absolute;
-            top: 4px;
-            right: 4px;
-            background-color: var(--danger);
-            color: white;
-            font-size: 10px;
-            border-radius: 50%;
-            padding: 2px 5px;
-        }
-
-        .content-body {
-            flex: 1;
-            padding: 25px;
-            overflow-y: auto;
-        }
-
-        .tab-panel {
-            display: none;
-        }
-
-        .tab-panel.active {
-            display: block;
-        }
-
-        /* Board Layout */
-        .board-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .btn-primary {
-            background-color: var(--primary);
-            color: #fff;
-            border: none;
-            padding: 10px 18px;
-            border-radius: 6px;
-            cursor: pointer;
-            font-weight: 600;
-            display: flex;
-            align-items: center;
             gap: 8px;
         }
 
-        .btn-primary:hover {
-            background-color: var(--primary-hover);
+        .btn-action:hover {
+            background-color: rgba(255, 255, 255, 0.2);
         }
 
-        .kanban-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
+        /* Main Content */
+        .main-content {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            overflow-y: auto;
+        }
+
+        header {
+            background-color: var(--card-bg);
+            padding: 20px 30px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border-bottom: 1px solid var(--border-color);
+        }
+
+        .content-area {
+            padding: 30px;
+        }
+
+        .tab-content {
+            display: none;
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        /* Kanban Board */
+        .kanban-board {
+            display: flex;
             gap: 20px;
-            align-items: start;
+            overflow-x: auto;
         }
 
-        .kanban-col {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
+        .kanban-column {
+            flex: 1;
+            min-width: 280px;
+            background-color: var(--card-bg);
             border-radius: 8px;
             padding: 15px;
-            min-height: 500px;
-        }
-
-        .col-title {
-            font-size: 14px;
-            font-weight: 700;
-            color: var(--text-sub);
-            margin-bottom: 15px;
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            text-transform: uppercase;
-        }
-
-        .col-count {
-            background: var(--bg-main);
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 12px;
-        }
-
-        .task-card {
-            background-color: var(--bg-card);
             border: 1px solid var(--border-color);
-            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.04);
-            border-radius: 6px;
-            padding: 12px;
-            margin-bottom: 12px;
-            cursor: grab;
-            position: relative;
         }
 
-        .task-card:hover {
-            border-color: var(--primary);
-        }
-
-        .task-tag {
-            display: inline-block;
-            font-size: 10px;
+        .column-title {
+            font-size: 1.1rem;
+            margin-bottom: 15px;
             font-weight: bold;
-            padding: 2px 6px;
-            border-radius: 4px;
-            background-color: rgba(2, 132, 199, 0.1);
-            color: var(--primary);
-            margin-bottom: 8px;
-        }
-
-        .task-title {
-            font-size: 13px;
-            font-weight: 600;
-            margin-bottom: 10px;
-            line-height: 1.4;
-        }
-
-        .status-select {
-            margin-top: 8px;
-            width: 100%;
-            padding: 4px;
-            font-size: 11px;
-            border-radius: 4px;
-            border: 1px solid var(--border-color);
-            background-color: var(--bg-main);
-            color: var(--text-main);
-        }
-
-        /* Reports Dashboard Styles */
-        .stats-grid {
-            display: grid;
-            grid-template-columns: repeat(4, 1fr);
-            gap: 20px;
-            margin-bottom: 25px;
-        }
-
-        .stat-card {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            padding: 20px;
-            border-radius: 8px;
-            display: flex;
-            align-items: center;
-            gap: 15px;
-        }
-
-        .stat-icon {
-            width: 48px;
-            height: 48px;
-            border-radius: 8px;
-            background-color: rgba(2, 132, 199, 0.1);
-            color: var(--primary);
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-        }
-
-        .stat-val {
-            font-size: 22px;
-            font-weight: bold;
-        }
-
-        .stat-lbl {
-            font-size: 12px;
-            color: var(--text-sub);
-        }
-
-        .charts-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 20px;
-            margin-bottom: 25px;
-        }
-
-        .chart-box {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            padding: 20px;
-            border-radius: 8px;
-        }
-
-        .data-table {
-            width: 100%;
-            border-collapse: collapse;
-            background-color: var(--bg-card);
-            border-radius: 8px;
-            overflow: hidden;
-            border: 1px solid var(--border-color);
-        }
-
-        .data-table th, .data-table td {
-            padding: 12px 15px;
-            text-align: right;
-            border-bottom: 1px solid var(--border-color);
-            font-size: 13px;
-        }
-
-        [dir="ltr"] .data-table th, [dir="ltr"] .data-table td {
-            text-align: left;
-        }
-
-        .data-table th {
-            background-color: var(--bg-main);
-            color: var(--text-sub);
-            font-weight: 600;
-        }
-
-        /* Management Styles (Categories & Team) */
-        .management-card {
-            background-color: var(--bg-card);
-            border: 1px solid var(--border-color);
-            padding: 20px;
-            border-radius: 8px;
-            max-width: 600px;
-        }
-
-        .input-group {
-            display: flex;
-            gap: 10px;
-            margin-bottom: 15px;
-        }
-
-        .form-input {
-            flex: 1;
-            padding: 8px 12px;
-            border-radius: 6px;
-            border: 1px solid var(--border-color);
-            background-color: var(--bg-main);
-            color: var(--text-main);
-        }
-
-        .item-list {
-            list-style: none;
-        }
-
-        .item-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            padding: 10px;
-            border-bottom: 1px solid var(--border-color);
-        }
-
-        .btn-delete {
-            background: none;
-            border: none;
-            color: var(--danger);
-            cursor: pointer;
-        }
-
-        /* Modals */
-        .modal-overlay {
-            position: fixed;
-            top: 0; left: 0; right: 0; bottom: 0;
-            background-color: rgba(0, 0, 0, 0.5);
-            display: none;
-            align-items: center;
-            justify-content: center;
-            z-index: 1000;
-        }
-
-        .modal-content {
-            background-color: var(--bg-card);
-            border-radius: 8px;
-            padding: 25px;
-            width: 100%;
-            max-width: 500px;
-        }
-
-        .modal-header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-        }
-
-        .form-group {
-            margin-bottom: 15px;
-        }
-
-        .form-group label {
-            display: block;
-            font-size: 12px;
-            color: var(--text-sub);
-            margin-bottom: 5px;
-        }
-
-        .form-group input, .form-group select {
-            width: 100%;
-            padding: 8px;
-            border-radius: 6px;
-            border: 1px solid var(--border-color);
-            background-color: var(--bg-main);
-            color: var(--text-main);
-        }
-
-        .notif-item {
-            padding: 10px;
-            border-bottom: 1px solid var(--border-color);
-            cursor: pointer;
-        }
-
-        .notif-item:hover {
-            background-color: var(--bg-main);
         }
     </style>
 </head>
 <body>
 
-    <!-- Sidebar Navigation -->
+    <!-- Sidebar -->
     <aside class="sidebar">
         <div>
             <div class="brand">
-                <i class="fa-solid fa-fire-flame-curved"></i>
-                <div class="brand-text">
-                    <h2>GasTrack</h2>
-                    <p data-key="subHeader">شركة إيجاس - IT</p>
-                </div>
+                <i class="fas fa-fire"></i> GasTrack
             </div>
-            <ul class="nav-list">
-                <li class="nav-item active" onclick="switchTab('board', this)">
-                    <i class="fa-solid fa-gauge-high"></i>
-                    <span data-key="navBoard">Dashboard</span>
+            <ul class="nav-links">
+                <li class="nav-item active" data-tab="dashboard">
+                    <i class="fas fa-chart-line"></i> Dashboard
                 </li>
-                <li class="nav-item" onclick="switchTab('reports', this)">
-                    <i class="fa-solid fa-chart-pie"></i>
-                    <span data-key="navReports">التقارير والإحصائيات</span>
+                <li class="nav-item" data-tab="kanban">
+                    <i class="fas fa-tasks"></i> Kanban Board
                 </li>
-                <li class="nav-item" onclick="switchTab('categories', this)">
-                    <i class="fa-solid fa-tags"></i>
-                    <span data-key="navCategories">إدارة التصنيفات</span>
+                <li class="nav-item" data-tab="team">
+                    <i class="fas fa-users"></i> Team Members
                 </li>
-                <li class="nav-item" onclick="switchTab('team', this)">
-                    <i class="fa-solid fa-users"></i>
-                    <span data-key="navTeam">إدارة الفريق</span>
+                <li class="nav-item" data-tab="categories">
+                    <i class="fas fa-tags"></i> Categories
                 </li>
             </ul>
         </div>
-        <div class="user-profile">
-            <div class="user-info">
-                <div class="avatar" id="user-avatar">IK</div>
-                <div class="user-details">
-                    <h4 id="user-display-name">Islam Elkady</h4>
-                    <p data-key="leaderRole">قائد الفريق (Admin)</p>
-                </div>
-            </div>
-            <button class="logout-btn" onclick="logout()" title="تسجيل الخروج"><i class="fa-solid fa-right-from-bracket"></i></button>
+
+        <div class="sidebar-footer">
+            <button type="button" id="themeToggle" class="btn-action">
+                <i class="fas fa-moon"></i> Toggle Dark
+            </button>
+            <!-- استخدام onclick مباشر يضمن اشتغال اللوج أوت بنسبة 100% بدون أي تعارض -->
+            <button type="button" id="logoutBtn" onclick="handleLogout()" class="btn-action" style="background-color: #dc3545;">
+                <i class="fas fa-sign-out-alt"></i> Log Out
+            </button>
         </div>
     </aside>
 
-    <!-- Main Content Wrapper -->
-    <div class="main-wrapper">
-        <!-- Top Header Controls -->
-        <header class="top-navbar">
-            <h3 id="current-page-title" data-key="titleBoard">Dashboard</h3>
-            <div class="header-actions">
-                <button class="icon-btn" onclick="toggleTheme()" title="تغيير الثيم">
-                    <i class="fa-solid fa-moon" id="theme-icon"></i>
-                </button>
-                <button class="icon-btn" onclick="toggleLanguage()" title="تغيير اللغة">
-                    <i class="fa-solid fa-globe"></i>
-                </button>
-                <button class="icon-btn" onclick="toggleNotifications()" title="التنبيهات">
-                    <i class="fa-solid fa-bell"></i>
-                    <span class="badge" id="notif-count">0</span>
-                </button>
-            </div>
+    <!-- Main Content -->
+    <main class="main-content">
+        <header>
+            <h2 id="pageTitle">Dashboard</h2>
+            <div id="userGreeting">Welcome, User</div>
         </header>
 
-        <!-- Body Area -->
-        <main class="content-body">
-            
-            <!-- Tab 1: Dashboard Board -->
-            <section id="tab-board" class="tab-panel active">
-                <div class="board-header">
-                    <h2></h2>
-                    <button class="btn-primary" onclick="openModal('taskModal')">
-                        <i class="fa-solid fa-plus"></i> <span data-key="addTaskBtn">إضافة مهمة جديدة</span>
-                    </button>
-                </div>
-                <div class="kanban-grid">
-                    <div class="kanban-col" ondragover="allowDrop(event)" ondrop="drop(event, 'todo')">
-                        <div class="col-title"><span data-key="colTodo">قيد الانتظار</span> <span class="col-count" id="count-todo">0</span></div>
-                        <div id="col-todo"></div>
-                    </div>
-                    <div class="kanban-col" ondragover="allowDrop(event)" ondrop="drop(event, 'in_progress')">
-                        <div class="col-title"><span data-key="colInProgress">قيد التنفيذ</span> <span class="col-count" id="count-in_progress">0</span></div>
-                        <div id="col-in_progress"></div>
-                    </div>
-                    <div class="kanban-col" ondragover="allowDrop(event)" ondrop="drop(event, 'review')">
-                        <div class="col-title"><span data-key="colReview">للمراجعة</span> <span class="col-count" id="count-review">0</span></div>
-                        <div id="col-review"></div>
-                    </div>
-                    <div class="kanban-col" ondragover="allowDrop(event)" ondrop="drop(event, 'done')">
-                        <div class="col-title"><span data-key="colDone">مكتملة</span> <span class="col-count" id="count-done">0</span></div>
-                        <div id="col-done"></div>
-                    </div>
-                </div>
-            </section>
-
-            <!-- Tab 2: Reports & Analytics -->
-            <section id="tab-reports" class="tab-panel">
-                <div class="stats-grid">
-                    <div class="stat-card">
-                        <div class="stat-icon"><i class="fa-solid fa-list-check"></i></div>
-                        <div>
-                            <div class="stat-val" id="stat-total">0</div>
-                            <div class="stat-lbl" data-key="statTotal">إجمالي المهام</div>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon" style="color: var(--success);"><i class="fa-solid fa-circle-check"></i></div>
-                        <div>
-                            <div class="stat-val" id="stat-completed">0</div>
-                            <div class="stat-lbl" data-key="statDone">المهام المكتملة</div>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon" style="color: var(--accent);"><i class="fa-solid fa-clock"></i></div>
-                        <div>
-                            <div class="stat-val" id="stat-pending">0</div>
-                            <div class="stat-lbl" data-key="statPending">المهام المتبقية</div>
-                        </div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-icon" style="color: #8b5cf6;"><i class="fa-solid fa-chart-line"></i></div>
-                        <div>
-                            <div class="stat-val" id="stat-rate">0%</div>
-                            <div class="stat-lbl" data-key="statRate">نسبة الإنجاز الكلية</div>
-                        </div>
-                    </div>
-                </div>
-
-                <div class="charts-grid">
-                    <div class="chart-box">
-                        <h4 style="margin-bottom: 15px;" data-key="chartStatusTitle">توزيع حالات المهام</h4>
-                        <canvas id="statusChart" height="200"></canvas>
-                    </div>
-                    <div class="chart-box">
-                        <h4 style="margin-bottom: 15px;" data-key="chartMemberTitle">إنجاز المهام لكل موظف</h4>
-                        <canvas id="memberChart" height="200"></canvas>
-                    </div>
-                </div>
-
-                <div class="chart-box">
-                    <h4 style="margin-bottom: 15px;" data-key="tableTitle">تقرير أداء أعضاء تيم IT - شركة EGAS</h4>
-                    <table class="data-table">
-                        <thead>
-                            <tr>
-                                <th data-key="thMember">الموظف</th>
-                                <th data-key="thRole">المسمى الوظيفي</th>
-                                <th data-key="thTotal">المهام المسندة</th>
-                                <th data-key="thDone">تم التسليم</th>
-                                <th data-key="thProgress">قيد التنفيذ</th>
-                                <th data-key="thRate">نسبة الإنجاز</th>
-                            </tr>
-                        </thead>
-                        <tbody id="team-report-body"></tbody>
-                    </table>
-                </div>
-            </section>
-
-            <!-- Tab 3: Categories -->
-            <section id="tab-categories" class="tab-panel">
-                <div class="management-card">
-                    <h3 style="margin-bottom: 10px;" data-key="catTitle">إدارة التصنيفات (Categories)</h3>
-                    <p style="font-size: 12px; color: var(--text-sub); margin-bottom: 20px;" data-key="catSub">إضافة وتعديل مجالات العمل في القسم.</p>
-                    <div class="input-group">
-                        <input type="text" id="new-cat-input" class="form-input" placeholder="اسم التصنيف الجديد...">
-                        <button class="btn-primary" onclick="addCategory()" data-key="btnAdd">إضافة</button>
-                    </div>
-                    <ul class="item-list" id="categories-container-list"></ul>
-                </div>
-            </section>
-
-            <!-- Tab 4: Team -->
-            <section id="tab-team" class="tab-panel">
-                <div class="management-card">
-                    <h3 style="margin-bottom: 10px;" data-key="teamTitle">إدارة أعضاء الفريق (EGAS IT Members)</h3>
-                    <div class="input-group" style="margin-top: 20px;">
-                        <input type="text" id="new-member-name" class="form-input" placeholder="اسم الموظف الجديد...">
-                        <button class="btn-primary" onclick="addTeamMember()" data-key="btnAddMember">إضافة موظف</button>
-                    </div>
-                    <ul class="item-list" id="team-members-container-list"></ul>
-                </div>
-            </section>
-
-        </main>
-    </div>
-
-    <!-- Modal: Add Task -->
-    <div class="modal-overlay" id="taskModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 data-key="modalAddTaskTitle">إضافة مهمة جديدة</h3>
-                <button class="icon-btn" onclick="closeModal('taskModal')"><i class="fa-solid fa-xmark"></i></button>
+        <div class="content-area">
+            <!-- Dashboard Tab -->
+            <div id="dashboard" class="tab-content active">
+                <h3>System Overview</h3>
+                <p>Welcome to EGAS IT Management System.</p>
             </div>
-            <form id="add-task-form" onsubmit="handleAddTask(event)">
-                <div class="form-group">
-                    <label data-key="lblTaskTitle">عنوان المهمة</label>
-                    <input type="text" id="task-title-input" required>
-                </div>
-                <div class="form-group">
-                    <label data-key="lblCat">التصنيف</label>
-                    <select id="task-cat-select"></select>
-                </div>
-                <div class="form-group">
-                    <label data-key="lblAssignee">الموظف المسؤول</label>
-                    <select id="task-assignee-select"></select>
-                </div>
-                <div class="form-group">
-                    <label data-key="lblDate">تاريخ الاستحقاق</label>
-                    <input type="date" id="task-date-input" required>
-                </div>
-                <button type="submit" class="btn-primary" style="width: 100%; justify-content: center; margin-top: 15px;" data-key="btnCreateTask">إنشاء المهمة</button>
-            </form>
-        </div>
-    </div>
 
-    <!-- Modal: Notifications -->
-    <div class="modal-overlay" id="notifModal">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h3 data-key="notifTitle">التنبيهات والمهام المطلوبة</h3>
-                <button class="icon-btn" onclick="closeModal('notifModal')"><i class="fa-solid fa-xmark"></i></button>
+            <!-- Kanban Tab -->
+            <div id="kanban" class="tab-content">
+                <div class="kanban-board">
+                    <div class="kanban-column">
+                        <div class="column-title">To Do</div>
+                        <p>No tasks yet.</p>
+                    </div>
+                    <div class="kanban-column">
+                        <div class="column-title">In Progress</div>
+                        <p>No tasks yet.</p>
+                    </div>
+                    <div class="kanban-column">
+                        <div class="column-title">Done</div>
+                        <p>No tasks yet.</p>
+                    </div>
+                </div>
             </div>
-            <div id="notif-list"></div>
+
+            <!-- Team Tab -->
+            <div id="team" class="tab-content">
+                <h3>Team Members</h3>
+                <p>List of EGAS IT team members.</p>
+            </div>
+
+            <!-- Categories Tab -->
+            <div id="categories" class="tab-content">
+                <h3>Task Categories</h3>
+                <p>Manage project categories here.</p>
+            </div>
         </div>
-    </div>
+    </main>
 
-    <!-- Complete JavaScript Application Logic -->
-    <script>
-        const translations = {
-            ar: {
-                subHeader: "شركة إيجاس - IT",
-                navBoard: "Dashboard",
-                navReports: "التقارير والإحصائيات",
-                navCategories: "إدارة التصنيفات",
-                navTeam: "إدارة الفريق",
-                leaderRole: "قائد الفريق (Admin)",
-                titleBoard: "Dashboard",
-                titleReports: "تقارير الأداء ومتابعة تسليمات الموظفين",
-                titleCategories: "إدارة وتعديل التصنيفات (Categories)",
-                titleTeam: "إدارة أعضاء فريق تكنولوجيا المعلومات",
-                addTaskBtn: "إضافة مهمة جديدة",
-                colTodo: "قيد الانتظار (To Do)",
-                colInProgress: "قيد التنفيذ (In Progress)",
-                colReview: "للمراجعة (Review)",
-                colDone: "مكتملة (Done)",
-                statTotal: "إجمالي المهام",
-                statDone: "المهام المكتملة",
-                statPending: "المهام المتبقية",
-                statRate: "نسبة الانجاز الكلية",
-                chartStatusTitle: "توزيع حالات المهام",
-                chartMemberTitle: "إنجاز المهام لكل موظف",
-                tableTitle: "تقرير أداء أعضاء تيم IT - شركة EGAS",
-                thMember: "الموظف",
-                thRole: "المسمى الوظيفي",
-                thTotal: "المهام المسندة",
-                thDone: "تم التسليم",
-                thProgress: "قيد التنفيذ",
-                thRate: "نسبة الإنجاز",
-                catTitle: "إدارة التصنيفات (Categories)",
-                catSub: "إضافة وتعديل مجالات العمل في القسم.",
-                btnAdd: "إضافة",
-                teamTitle: "إدارة أعضاء الفريق (EGAS IT Members)",
-                btnAddMember: "إضافة موظف",
-                modalAddTaskTitle: "إضافة مهمة جديدة",
-                lblTaskTitle: "عنوان المهمة",
-                lblCat: "التصنيف",
-                lblAssignee: "الموظف المسؤول",
-                lblDate: "تاريخ الاستحقاق",
-                btnCreateTask: "إنشاء المهمة",
-                notifTitle: "التنبيهات والمهام المطلوبة"
-            },
-            en: {
-                subHeader: "EGAS Holding Company",
-                navBoard: "Dashboard",
-                navReports: "Reports & Analytics",
-                navCategories: "Manage Categories",
-                navTeam: "Team Management",
-                leaderRole: "Team Leader & Admin",
-                titleBoard: "Dashboard",
-                titleReports: "Employee Performance & Delivery Reports",
-                titleCategories: "Manage Category Domains",
-                titleTeam: "IT Team Members Management",
-                addTaskBtn: "Add New Task",
-                colTodo: "To Do",
-                colInProgress: "In Progress",
-                colReview: "Under Review",
-                colDone: "Done",
-                statTotal: "Total Tasks",
-                statDone: "Completed Tasks",
-                statPending: "Pending Tasks",
-                statRate: "Overall Success Rate",
-                chartStatusTitle: "Task Status Distribution",
-                chartMemberTitle: "Completed Tasks per Member",
-                tableTitle: "EGAS IT Team Performance Report",
-                thMember: "Employee",
-                thRole: "Role Title",
-                thTotal: "Assigned Tasks",
-                thDone: "Delivered",
-                thProgress: "In Progress",
-                thRate: "Completion Rate",
-                catTitle: "Category Management",
-                catSub: "Add/Remove department work categories.",
-                btnAdd: "Add Category",
-                teamTitle: "EGAS IT Team Management",
-                btnAddMember: "Add Employee",
-                modalAddTaskTitle: "Create New Issue",
-                lblTaskTitle: "Task Title",
-                lblCat: "Category",
-                lblAssignee: "Assignee",
-                lblDate: "Due Date",
-                btnCreateTask: "Create Task",
-                notifTitle: "Notifications & Action Items"
-            }
-        };
-
-        const defaultTeam = ["Islam Elkady (Leader)", "Mohamed", "Marwa", "Sherief", "Sohila", "Maghraby", "Mamdouh"];
-        const defaultCategories = ["AI", "Training", "Communication", "Cyber Security"];
-
-        let state = {
-            tasks: JSON.parse(localStorage.getItem('egas_tasks')) || [
-                { id: 1, title: "تطوير نموذج الذكاء الاصطناعي لتحليل بيانات الغاز", category: "AI", assignee: "Mohamed", status: "in_progress", date: "2026-08-25" },
-                { id: 2, title: "فحص الاختراق الدوري لشبكة EGAS", category: "Cyber Security", assignee: "Sherief", status: "todo", date: "2026-08-30" },
-                { id: 3, title: "دورة تدريبية للعاملين على الأمن السيبراني", category: "Training", assignee: "Marwa", status: "review", date: "2026-08-22" },
-                { id: 4, title: "ترقية أجهزة السويتشات بسنترال الشركة", category: "Communication", assignee: "Maghraby", status: "done", date: "2026-08-15" },
-                { id: 5, title: "تعديل إعدادات Firewall الرئيسي", category: "Cyber Security", assignee: "Sohila", status: "in_progress", date: "2026-08-28" },
-                { id: 6, title: "متابعة أجهزة الحسابات الجديدة", category: "Communication", assignee: "Mamdouh", status: "todo", date: "2026-08-29" }
-            ],
-            unreadNotifs: JSON.parse(localStorage.getItem('egas_notifs')) || [1, 2, 3, 5, 6],
-            categories: JSON.parse(localStorage.getItem('egas_cats')) || defaultCategories,
-            team: JSON.parse(localStorage.getItem('egas_team')) || defaultTeam,
-            lang: localStorage.getItem('egas_lang') || 'ar',
-            theme: localStorage.getItem('egas_theme') || 'light'
-        };
-
-        let statusChartObj = null;
-        let memberChartObj = null;
-
-        document.addEventListener('DOMContentLoaded', () => {
-            const currentUser = localStorage.getItem('currentUser');
-            if (currentUser) {
-                document.getElementById('user-display-name').innerText = currentUser;
-                document.getElementById('user-avatar').innerText = currentUser.substring(0, 2).toUpperCase();
-            }
-
-            applyTheme(state.theme);
-            applyLanguage(state.lang);
-            renderAll();
-        });
-
-        function saveState() {
-            localStorage.setItem('egas_tasks', JSON.stringify(state.tasks));
-            localStorage.setItem('egas_notifs', JSON.stringify(state.unreadNotifs));
-            localStorage.setItem('egas_cats', JSON.stringify(state.categories));
-            localStorage.setItem('egas_team', JSON.stringify(state.team));
-            localStorage.setItem('egas_lang', state.lang);
-            localStorage.setItem('egas_theme', state.theme);
-        }
-
-        function renderAll() {
-            renderBoard();
-            renderReports();
-            renderCategories();
-            renderTeam();
-            updateSelects();
-            updateNotifications();
-            saveState();
-        }
-
-        function switchTab(tabId, element) {
-            document.querySelectorAll('.tab-panel').forEach(el => el.classList.remove('active'));
-            document.querySelectorAll('.nav-item').forEach(el => el.classList.remove('active'));
-            
-            document.getElementById(`tab-${tabId}`).classList.add('active');
-            element.classList.add('active');
-
-            const keyMap = { board: 'titleBoard', reports: 'titleReports', categories: 'titleCategories', team: 'titleTeam' };
-            const titleElem = document.getElementById('current-page-title');
-            titleElem.setAttribute('data-key', keyMap[tabId]);
-            titleElem.innerText = translations[state.lang][keyMap[tabId]];
-        }
-
-        function renderBoard() {
-            const cols = { todo: [], in_progress: [], review: [], done: [] };
-            state.tasks.forEach(task => { if (cols[task.status]) cols[task.status].push(task); });
-
-            for (let key in cols) {
-                const container = document.getElementById(`col-${key}`);
-                document.getElementById(`count-${key}`).innerText = cols[key].length;
-                container.innerHTML = '';
-
-                cols[key].forEach(task => {
-                    const card = document.createElement('div');
-                    card.className = 'task-card';
-                    card.draggable = true;
-                    card.ondragstart = (e) => e.dataTransfer.setData('text/plain', task.id);
-
-                    card.innerHTML = `
-                        <span class="task-tag">${task.category}</span>
-                        <div class="task-title">${task.title}</div>
-                        <div style="font-size: 12px; color: var(--text-sub); display: flex; justify-content: space-between; align-items: center;">
-                            <span><i class="fa-regular fa-user"></i> ${task.assignee}</span>
-                            <span><i class="fa-regular fa-clock"></i> ${task.date}</span>
-                        </div>
-                        <select class="status-select" onchange="changeTaskStatus(${task.id}, this.value)">
-                            <option value="todo" ${task.status === 'todo' ? 'selected' : ''}>To Do</option>
-                            <option value="in_progress" ${task.status === 'in_progress' ? 'selected' : ''}>In Progress</option>
-                            <option value="review" ${task.status === 'review' ? 'selected' : ''}>Review</option>
-                            <option value="done" ${task.status === 'done' ? 'selected' : ''}>Done</option>
-                        </select>
-                    `;
-                    container.appendChild(card);
-                });
-            }
-        }
-
-        function changeTaskStatus(id, newStatus) {
-            const task = state.tasks.find(t => t.id == id);
-            if (task) {
-                task.status = newStatus;
-                renderAll();
-            }
-        }
-
-        function allowDrop(ev) { ev.preventDefault(); }
-        function drop(ev, newStatus) {
-            ev.preventDefault();
-            const taskId = ev.dataTransfer.getData('text/plain');
-            changeTaskStatus(taskId, newStatus);
-        }
-
-        function handleAddTask(e) {
-            e.preventDefault();
-            const title = document.getElementById('task-title-input').value;
-            const category = document.getElementById('task-cat-select').value;
-            const assignee = document.getElementById('task-assignee-select').value;
-            const date = document.getElementById('task-date-input').value;
-
-            const newId = Date.now();
-            state.tasks.push({ id: newId, title, category, assignee, date, status: 'todo' });
-            state.unreadNotifs.push(newId);
-
-            closeModal('taskModal');
-            document.getElementById('add-task-form').reset();
-            renderAll();
-        }
-
-        function renderReports() {
-            const total = state.tasks.length;
-            const completed = state.tasks.filter(t => t.status === 'done').length;
-            const pending = total - completed;
-            const rate = total > 0 ? Math.round((completed / total) * 100) : 0;
-
-            document.getElementById('stat-total').innerText = total;
-            document.getElementById('stat-completed').innerText = completed;
-            document.getElementById('stat-pending').innerText = pending;
-            document.getElementById('stat-rate').innerText = `${rate}%`;
-
-            const tbody = document.getElementById('team-report-body');
-            tbody.innerHTML = '';
-
-            state.team.forEach(member => {
-                const memberTasks = state.tasks.filter(t => t.assignee === member);
-                const memberDone = memberTasks.filter(t => t.status === 'done').length;
-                const memberProgress = memberTasks.filter(t => t.status !== 'done').length;
-                const memberRate = memberTasks.length > 0 ? Math.round((memberDone / memberTasks.length) * 100) : 0;
-
-                const row = document.createElement('tr');
-                row.innerHTML = `
-                    <td><strong>${member}</strong></td>
-                    <td>${member.includes('Leader') ? 'Team Leader' : 'IT Specialist'}</td>
-                    <td>${memberTasks.length}</td>
-                    <td style="color: #10b981; font-weight: bold;">${memberDone}</td>
-                    <td style="color: #f59e0b;">${memberProgress}</td>
-                    <td><strong>${memberRate}%</strong></td>
-                `;
-                tbody.appendChild(row);
-            });
-
-            renderCharts();
-        }
-
-        function renderCharts() {
-            const statusCounts = {
-                todo: state.tasks.filter(t => t.status === 'todo').length,
-                in_progress: state.tasks.filter(t => t.status === 'in_progress').length,
-                review: state.tasks.filter(t => t.status === 'review').length,
-                done: state.tasks.filter(t => t.status === 'done').length
-            };
-
-            const memberLabels = state.team;
-            const memberDoneData = state.team.map(m => state.tasks.filter(t => t.assignee === m && t.status === 'done').length);
-
-            if (statusChartObj) statusChartObj.destroy();
-            if (memberChartObj) memberChartObj.destroy();
-
-            const ctx1 = document.getElementById('statusChart').getContext('2d');
-            statusChartObj = new Chart(ctx1, {
-                type: 'doughnut',
-                data: {
-                    labels: ['To Do', 'In Progress', 'Review', 'Done'],
-                    datasets: [{
-                        data: [statusCounts.todo, statusCounts.in_progress, statusCounts.review, statusCounts.done],
-                        backgroundColor: ['#64748b', '#3b82f6', '#f59e0b', '#10b981']
-                    }]
-                },
-                options: { responsive: true, plugins: { legend: { position: 'bottom' } } }
-            });
-
-            const ctx2 = document.getElementById('memberChart').getContext('2d');
-            memberChartObj = new Chart(ctx2, {
-                type: 'bar',
-                data: {
-                    labels: memberLabels,
-                    datasets: [{
-                        label: 'المهام المُنجزة (Done)',
-                        data: memberDoneData,
-                        backgroundColor: '#0284c7'
-                    }]
-                },
-                options: { responsive: true, scales: { y: { beginAtZero: true, ticks: { stepSize: 1 } } } }
-            });
-        }
-
-        function renderCategories() {
-            const container = document.getElementById('categories-container-list');
-            container.innerHTML = '';
-            state.categories.forEach(cat => {
-                const li = document.createElement('li');
-                li.className = 'item-row';
-                li.innerHTML = `
-                    <span><i class="fa-solid fa-tag"></i> ${cat}</span>
-                    <button class="btn-delete" onclick="deleteCategory('${cat}')"><i class="fa-solid fa-trash"></i></button>
-                `;
-                container.appendChild(li);
-            });
-        }
-
-        function addCategory() {
-            const val = document.getElementById('new-cat-input').value.trim();
-            if (val && !state.categories.includes(val)) {
-                state.categories.push(val);
-                document.getElementById('new-cat-input').value = '';
-                renderAll();
-            }
-        }
-
-        function deleteCategory(cat) {
-            state.categories = state.categories.filter(c => c !== cat);
-            renderAll();
-        }
-
-        function renderTeam() {
-            const container = document.getElementById('team-members-container-list');
-            container.innerHTML = '';
-            state.team.forEach(member => {
-                const li = document.createElement('li');
-                li.className = 'item-row';
-                li.innerHTML = `
-                    <span><i class="fa-solid fa-user"></i> ${member}</span>
-                    ${!member.includes('Leader') ? `<button class="btn-delete" onclick="deleteTeamMember('${member}')"><i class="fa-solid fa-trash"></i></button>` : '<span style="font-size:11px; color:#10b981;">Admin Leader</span>'}
-                `;
-                container.appendChild(li);
-            });
-        }
-
-        function addTeamMember() {
-            const val = document.getElementById('new-member-name').value.trim();
-            if (val && !state.team.includes(val)) {
-                state.team.push(val);
-                document.getElementById('new-member-name').value = '';
-                renderAll();
-            }
-        }
-
-        function deleteTeamMember(member) {
-            state.team = state.team.filter(m => m !== member);
-            renderAll();
-        }
-
-        function updateSelects() {
-            const catSelect = document.getElementById('task-cat-select');
-            const memberSelect = document.getElementById('task-assignee-select');
-            
-            catSelect.innerHTML = state.categories.map(c => `<option value="${c}">${c}</option>`).join('');
-            memberSelect.innerHTML = state.team.map(m => `<option value="${m}">${m}</option>`).join('');
-        }
-
-        function updateNotifications() {
-            document.getElementById('notif-count').innerText = state.unreadNotifs.length;
-            const list = document.getElementById('notif-list');
-            list.innerHTML = '';
-
-            if (state.unreadNotifs.length === 0) {
-                list.innerHTML = '<p style="text-align:center; color: var(--text-sub);">لا توجد إشعارات غير مقروءة!</p>';
-            } else {
-                state.unreadNotifs.forEach(id => {
-                    const task = state.tasks.find(t => t.id == id);
-                    if (task) {
-                        const item = document.createElement('div');
-                        item.className = 'notif-item';
-                        item.onclick = () => readNotification(task.id);
-                        item.innerHTML = `
-                            <strong>${task.title}</strong>
-                            <div style="font-size:11px; color: var(--text-sub);">المسؤول: ${task.assignee} | الموعد: ${task.date}</div>
-                            <span style="font-size:10px; color: #3b82f6;">(اضغط للتحديد كمعلم/مقروء)</span>
-                        `;
-                        list.appendChild(item);
-                    }
-                });
-            }
-        }
-
-        function readNotification(id) {
-            state.unreadNotifs = state.unreadNotifs.filter(nId => nId != id);
-            renderAll();
-        }
-
-        function toggleNotifications() { openModal('notifModal'); }
-
-        function toggleTheme() {
-            state.theme = state.theme === 'light' ? 'dark' : 'light';
-            applyTheme(state.theme);
-            saveState();
-        }
-
-        function applyTheme(theme) {
-            document.documentElement.setAttribute('data-theme', theme);
-            document.getElementById('theme-icon').className = theme === 'dark' ? 'fa-solid fa-sun' : 'fa-solid fa-moon';
-        }
-
-        function toggleLanguage() {
-            state.lang = state.lang === 'ar' ? 'en' : 'ar';
-            applyLanguage(state.lang);
-            saveState();
-            renderAll();
-        }
-
-        function applyLanguage(lang) {
-            document.documentElement.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
-            document.documentElement.setAttribute('lang', lang);
-
-            document.querySelectorAll('[data-key]').forEach(el => {
-                const key = el.getAttribute('data-key');
-                if (translations[lang][key]) {
-                    el.innerText = translations[lang][key];
-                }
-            });
-        }
-
-        function openModal(id) { document.getElementById(id).style.display = 'flex'; }
-        function closeModal(id) { document.getElementById(id).style.display = 'none'; }
-
-        // وظيفة تسجيل الخروج المحدثة
-        function logout() {
-            localStorage.removeItem('isLoggedIn');
-            localStorage.removeItem('currentUser');
-            window.location.href = './login.html';
-        }
-    </script>
+    <script src="app.js"></script>
 </body>
 </html>
