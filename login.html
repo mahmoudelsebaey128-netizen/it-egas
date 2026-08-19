@@ -7,9 +7,9 @@
     <!-- FontAwesome Icons -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script>
-        // إذا كان المستخدم مسجلاً دخوله بالفعل يتم توجيهه للوحة التحكم
+        // التوجيه التلقائي لوحة التحكم إذا كان مسجلاً لدخوله بالتعريف النسبي
         if (localStorage.getItem('isLoggedIn') === 'true') {
-            window.location.href = 'index.html';
+            window.location.href = './index.html';
         }
     </script>
     <style>
@@ -222,7 +222,7 @@
             if (user !== "" && pass !== "") {
                 localStorage.setItem('isLoggedIn', 'true');
                 localStorage.setItem('currentUser', user);
-                window.location.href = 'index.html';
+                window.location.href = './index.html';
             } else {
                 document.getElementById('error-msg').style.display = 'block';
             }
