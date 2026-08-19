@@ -428,3 +428,42 @@ function logout() {
     localStorage.removeItem('currentUser');
     window.location.href = './login.html';
 }
+// ==========================================
+// كود تشغيل اللوج أوت والتابات المباشر على تصميمك القديم
+// ==========================================
+document.addEventListener("DOMContentLoaded", function () {
+    
+    // 1. تشغيل اللوج أوت
+    document.addEventListener("click", function (e) {
+        // بيبحث عن أي عنصر مكتوب عليه logout أو خروج أو محطوط عليه class/id اللوج أوت
+        const target = e.target.closest("#logoutBtn, .logout-btn, [onclick*='logout'], a[href*='login']");
+        
+        if (target) {
+            e.preventDefault();
+            e.stopPropagation();
+            
+            // مسح الكاش والبيانات
+            localStorage.clear();
+            sessionStorage.clear();
+            
+            alert("تم تسجيل الخروج بنجاح");
+            
+            // تحويل لصفحة اللوجن أو إعادة تحميل الصفحة
+            window.location.href = "login.html";
+        }
+    });
+
+    // 2. ضمان عمل التنقل بين التابات
+    const navButtons = document.querySelectorAll("[data-tab], .sidebar li, .nav-link");
+    navButtons.forEach(btn => {
+        btn.addEventListener("click", function () {
+            const tabId = this.getAttribute("data-tab");
+            if (tabId) {
+                // إخفاء كل السكاشن وإظهار المحددة
+                document.querySelectorAll(".tab-content, section, .page-view").forEach(el => el.classList.remove("active"));
+                const targetSection = document.getElementById(tabId);
+                if (targetSection) targetSection.classList.add("active");
+            }
+        });
+    });
+});
