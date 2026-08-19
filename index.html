@@ -8,6 +8,12 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <!-- Chart.js -->
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // التحقق من حالة تسجيل الدخول فوراً قبل تحميل الصفحة
+        if (localStorage.getItem('isLoggedIn') !== 'true') {
+            window.location.href = 'login.html';
+        }
+    </script>
     <style>
         :root {
             --bg-main: #f4f6f9;
@@ -542,9 +548,9 @@
         </div>
         <div class="user-profile">
             <div class="user-info">
-                <div class="avatar">IK</div>
+                <div class="avatar" id="user-avatar">IK</div>
                 <div class="user-details">
-                    <h4>Islam Elkady</h4>
+                    <h4 id="user-display-name">Islam Elkady</h4>
                     <p data-key="leaderRole">قائد الفريق (Admin)</p>
                 </div>
             </div>
@@ -843,10 +849,14 @@
         let statusChartObj = null;
         let memberChartObj = null;
 
-        // تعديل الدخول المباشر: التسجيل التلقائي والدخول للوحة بدون إعادة توجيه
-        localStorage.setItem('isLoggedIn', 'true');
-
         document.addEventListener('DOMContentLoaded', () => {
+            // تحديث اسم المستخدم المسجل
+            const currentUser = localStorage.getItem('currentUser');
+            if (currentUser) {
+                document.getElementById('user-display-name').innerText = currentUser;
+                document.getElementById('user-avatar').innerText = currentUser.substring(0, 2).toUpperCase();
+            }
+
             applyTheme(state.theme);
             applyLanguage(state.lang);
             renderAll();
@@ -1155,9 +1165,11 @@
         function openModal(id) { document.getElementById(id).style.display = 'flex'; }
         function closeModal(id) { document.getElementById(id).style.display = 'none'; }
 
+        // وظيفة تسجيل الخروج المعدلة
         function logout() {
             localStorage.removeItem('isLoggedIn');
-            location.reload();
+            localStorage.removeItem('currentUser');
+            window.location.href = 'login.html';
         }
     </script>
 </body>
