@@ -184,7 +184,6 @@
             <button type="button" id="themeToggle" class="btn-action">
                 <i class="fas fa-moon"></i> Toggle Dark
             </button>
-            <!-- استخدام onclick مباشر يضمن اشتغال اللوج أوت بنسبة 100% بدون أي تعارض -->
             <button type="button" id="logoutBtn" onclick="handleLogout()" class="btn-action" style="background-color: #dc3545;">
                 <i class="fas fa-sign-out-alt"></i> Log Out
             </button>
@@ -237,6 +236,56 @@
         </div>
     </main>
 
+    <!-- Script الربط الخاص بالتطبيق -->
     <script src="app.js"></script>
+
+    <!-- كود تصحيح المراقبة والتفاعلات الأساسية -->
+    <script>
+        // ✅ الطريقة الصحيحة لاستخدام PerformanceObserver وتفادي خطأ المتصفح
+        if ('PerformanceObserver' in window) {
+            try {
+                const observer = new PerformanceObserver((list) => {
+                    for (const entry of list.getEntries()) {
+                        // يمكنك معالجة البيانات هنا إذا أردت
+                    }
+                });
+                
+                // استخدام type بدلاً من entryTypes مع buffered: true
+                observer.observe({ type: 'largest-contentful-paint', buffered: true });
+            } catch (e) {
+                console.warn('PerformanceObserver غير مدعوم في هذا المتصفح بهذه الإعدادات:', e);
+            }
+        }
+
+        // دالة تسجيل الخروج
+        function handleLogout() {
+            alert('تم تسجيل الخروج بنجاح.');
+            // يمكنك توجيه المستخدم لصفحة الدخول هنا:
+            // window.location.href = 'login.html';
+        }
+
+        // التبديل بين التبويبات (Tabs)
+        document.querySelectorAll('.nav-item').forEach(item => {
+            item.addEventListener('click', function() {
+                document.querySelectorAll('.nav-item').forEach(nav => nav.classList.remove('active'));
+                document.querySelectorAll('.tab-content').forEach(tab => tab.classList.remove('active'));
+
+                this.classList.add('active');
+                const targetTab = this.getAttribute('data-tab');
+                document.getElementById(targetTab).classList.add('active');
+                
+                const titleText = this.innerText.trim();
+                document.getElementById('pageTitle').innerText = titleText;
+            });
+        });
+
+        // التبديل إلى الوضع الليلي (Dark Mode)
+        const themeToggleBtn = document.getElementById('themeToggle');
+        if (themeToggleBtn) {
+            themeToggleBtn.addEventListener('click', () => {
+                document.body.classList.toggle('dark-mode');
+            });
+        }
+    </script>
 </body>
 </html>
